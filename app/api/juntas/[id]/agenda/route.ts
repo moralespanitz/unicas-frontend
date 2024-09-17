@@ -1,0 +1,108 @@
+import { NextRequest, NextResponse } from 'next/server';
+// Import getAuth for authentication
+import { getAuth } from '@clerk/nextjs/server';
+
+interface AgendaItem {
+  id: number;
+  content: string;
+  juntaId: string; // Assuming juntaId is needed
+}
+
+  export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const { getToken } = getAuth(request);
+  const token = await getToken({ template: 'test' });
+
+  const response = await fetch(`http://localhost:8000/api/agenda/junta/${params.id}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  const agendaItems = await response.json(); // Get agenda items from the response
+  return NextResponse.json(agendaItems);
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const { getToken } = getAuth(request);
+    const token = await getToken({ template: 'test' });
+    const data = await request.json();
+    
+    const response = await fetch('http://localhost:8000/api/agenda/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        junta: data.juntaId, // Ensure juntaId is sent correctly
+        content: data.content,   // Ensure content is sent correctly
+      }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const newAgendaItem = await response.json(); // Get the newly created agenda item
+    return NextResponse.json(newAgendaItem, { status: 201 }); // Return the new item
+  } catch (error) {
+    console.error('Error posting agenda item:', error);
+    return NextResponse.json({ error: 'Failed to post agenda item' }, { status: 500 });
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const { getToken } = getAuth(request);
+    const token = await getToken({ template: 'test' });
+    const data = await request.json();
+    const { id, content, juntaId } = data; // Assuming id is sent in the request body
+
+    const response = await fetch(`http://localhost:8000/api/agenda/${id}/`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        junta: juntaId,
+        content: content
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const updatedAgendaItem = await response.json(); // Get the updated agenda item
+    return NextResponse.json(updatedAgendaItem, { status: 200 });
+  } catch (error) {
+    console.error('Error updating agenda item:', error);
+    return NextResponse.json({ error: 'Failed to update agenda item' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { getToken } = getAuth(request);
+    const token = await getToken({ template: 'test' });
+    const { id } = await request.json(); // Assuming id is sent in the request body
+
+    const response = await fetch(`http://localhost:8000/api/agenda/${id}/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return NextResponse.json({ message: 'Agenda item deleted successfully' }, { status: 200 });
+  } catch (error) {
+    console.error('Error deleting agenda item:', error);
+    return NextResponse.json({ error: 'Failed to delete agenda item' }, { status: 500 });
+  }
+}

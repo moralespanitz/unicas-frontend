@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   const { getToken } = getAuth(request)
   const token = await getToken({ template: 'test' })
 
-  const response = await fetch('https://unicas-backend.onrender.com0/api/juntas/', {
+  const response = await fetch('https://unicas-backend.onrender.com/api/juntas/', {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   console.log('Token', token)
   const requestBody = await request.json()
   console.log("Body", requestBody)
-  const response = await fetch('https://unicas-backend.onrender.com0/api/juntas/', {
+  const response = await fetch('https://unicas-backend.onrender.com/api/juntas/', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -39,7 +39,7 @@ export async function DELETE(request: NextRequest) {
   const requestBody = await request.json()
   console.log(requestBody)
   if (requestBody.id) {
-    const response = await fetch(`https://unicas-backend.onrender.com0/api/juntas/${requestBody.id}/`, {
+    const response = await fetch(`https://unicas-backend.onrender.com/api/juntas/${requestBody.id}/`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,

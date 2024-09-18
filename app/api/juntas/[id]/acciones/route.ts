@@ -7,7 +7,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   const { getToken } = getAuth(request);
   const token = await getToken({ template: 'test' });
 
-  const response = await fetch(`https://unicas-backend.onrender.com0/api/acciones/junta/${params.id}`, {
+  const response = await fetch(`https://unicas-backend.onrender.com/api/acciones/junta/${params.id}`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       "value": data.value,
       "junta": data.junta
     }
-    const response = await fetch('https://unicas-backend.onrender.com0/api/acciones/', {
+    const response = await fetch('https://unicas-backend.onrender.com/api/acciones/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

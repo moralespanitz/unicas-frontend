@@ -210,10 +210,10 @@ const PrestamosSection = ({ juntaId }: { juntaId: string }) => {
                                     <TableCell>S/.{prestamo.request_date}</TableCell>
                                     <TableCell>S/.{prestamo.amount}</TableCell>
                                     <TableCell>{prestamo.remaining_installments}</TableCell>
-                                    <TableCell>{prestamo.approved}</TableCell>
+                                    <TableCell>{prestamo.approved ? "Aceptado" : "Rechazado"}</TableCell>
                                     <TableCell>
                                         <div className="flex space-x-2">
-                                            <Button variant="ghost" size="icon" onClick={() => handleUpdate(prestamo.id)}><Pencil className="h-4 w-4" /></Button>
+                                            {/* <Button variant="ghost" size="icon" onClick={() => handleUpdate(prestamo.id)}><Pencil className="h-4 w-4" /></Button> */}
                                             <Button variant="ghost" size="icon" onClick={() => handleDelete(prestamo.id)}><Trash2 className="h-4 w-4" /></Button>
                                         </div>
                                     </TableCell>

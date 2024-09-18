@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const { getToken } = getAuth(request);
     const token = await getToken({ template: 'test' });
     const data = await request.json();
-    const response = await fetch('https://unicas-backend.onrender.com0/api/pagosprestamos/', {
+    const response = await fetch('https://unicas-backend.onrender.com/api/pagosprestamos/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const { getToken } = getAuth(request);
     const token = await getToken({ template: 'test' });
 
-    const response = await fetch(`https://unicas-backend.onrender.com0/api/pagosprestamos/junta/${params.id}`, {
+    const response = await fetch(`https://unicas-backend.onrender.com/api/pagosprestamos/junta/${params.id}`, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,

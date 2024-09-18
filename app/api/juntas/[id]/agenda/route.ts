@@ -7,7 +7,7 @@ import { getAuth } from '@clerk/nextjs/server';
   const { getToken } = getAuth(request);
   const token = await getToken({ template: 'test' });
 
-  const response = await fetch(`https://unicas-backend.onrender.com0/api/agenda/junta/${params.id}`, {
+  const response = await fetch(`https://unicas-backend.onrender.com/api/agenda/junta/${params.id}`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const token = await getToken({ template: 'test' });
     const data = await request.json();
     
-    const response = await fetch('https://unicas-backend.onrender.com0/api/agenda/', {
+    const response = await fetch('https://unicas-backend.onrender.com/api/agenda/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ export async function PUT(request: NextRequest) {
     const data = await request.json();
     const { id, content, juntaId } = data; // Assuming id is sent in the request body
 
-    const response = await fetch(`https://unicas-backend.onrender.com0/api/agenda/${id}/`, {
+    const response = await fetch(`https://unicas-backend.onrender.com/api/agenda/${id}/`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export async function DELETE(request: NextRequest) {
     const token = await getToken({ template: 'test' });
     const { id } = await request.json(); // Assuming id is sent in the request body
 
-    const response = await fetch(`https://unicas-backend.onrender.com0/api/agenda/${id}/`, {
+    const response = await fetch(`https://unicas-backend.onrender.com/api/agenda/${id}/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

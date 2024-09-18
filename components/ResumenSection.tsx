@@ -58,7 +58,7 @@ const ResumenSection = ({juntaId} : {juntaId: string}) => {
             </Table>
           </div>
 
-          <div>
+          {/* <div>
             <h2 className="text-2xl font-bold mb-4">Préstamos Activos</h2>
             <Table>
               <TableHeader>
@@ -87,7 +87,7 @@ const ResumenSection = ({juntaId} : {juntaId: string}) => {
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </div> */}
           {/* <div>
             <h2 className="text-2xl font-bold mb-4">Tabla General de Miembros</h2>
             <Table>

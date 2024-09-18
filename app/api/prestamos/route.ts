@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const { getToken } = getAuth(request)
   const token = await getToken({ template: 'test' })
 
-  const response = await fetch('https://unicas-backend.onrender.com0/api/prestamos/', {
+  const response = await fetch('https://unicas-backend.onrender.com/api/prestamos/', {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     const { getToken } = getAuth(request)
     const token = await getToken({ template: 'test' })
     const data = await request.json();
-    const response = await fetch('https://unicas-backend.onrender.com0/api/prestamos/',
+    const response = await fetch('https://unicas-backend.onrender.com/api/prestamos/',
       {
         method: 'POST',
         headers: {
@@ -51,7 +51,7 @@ export async function DELETE(request: NextRequest) {
     const token = await getToken({ template: 'test' })
     const { id } = await request.json(); // Expecting an ID in the request body
 
-    const response = await fetch(`https://unicas-backend.onrender.com0/api/prestamos/${id}/`, {
+    const response = await fetch(`https://unicas-backend.onrender.com/api/prestamos/${id}/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

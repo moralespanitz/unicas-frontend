@@ -3,17 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 // Import getAuth for authentication
 import { getAuth } from '@clerk/nextjs/server';
 
-interface Multa {
-  id: number;
-  reason: string; // Updated field
-  amount: string; // Updated field
-  status: string; // Updated field
-}
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const { getToken } = getAuth(request);
   const token = await getToken({ template: 'test' });
 
-  const response = await fetch(`http://localhost:8000/api/multas/junta/${params.id}`, {
+  const response = await fetch(`https://unicas-backend.onrender.com0/api/multas/junta/${params.id}`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
@@ -31,7 +25,7 @@ export async function POST(request: NextRequest) {
     const { getToken } = getAuth(request);
     const token = await getToken({ template: 'test' });
     const data = await request.json();
-    const response = await fetch('http://localhost:8000/api/multas/', {
+    const response = await fetch('https://unicas-backend.onrender.com0/api/multas/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   const { getToken } = getAuth(request)
   const token = await getToken({ template: 'test' })
 
-  const response = await fetch('http://localhost:8000/api/info', {
+  const response = await fetch('https://unicas-backend.onrender.com0/api/info', {
     headers: {
       'Authorization': `Bearer ${token}`
     }

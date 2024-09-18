@@ -1,13 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
-import { Protect } from "@clerk/nextjs";
-import { useRouter } from 'next/navigation';
 import { AddJuntaComponent } from "@/components/AddJuntaComponent";
 import { JuntaCard } from "@/components/JuntaCard";
-import { Junta } from "@/types/junta";
-import { Card, CardContent } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,9 +12,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Card, CardContent } from "@/components/ui/card";
+import { Junta } from "@/types/junta";
+import { Protect } from "@clerk/nextjs";
+import { Loader2 } from "lucide-react";
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from "react";
 
-import { SignOutButton } from "@clerk/nextjs";
-import { Button } from "@/components/ui/button";
 
 const Home: React.FC = () => {
   const [juntas, setJuntas] = useState<Junta[]>([]);

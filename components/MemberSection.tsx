@@ -1,4 +1,3 @@
-import React from 'react'
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -31,9 +30,9 @@ function MembersList({ members, onEdit, onDelete }: { members: any[]; onEdit: (m
                                 <TableCell>{member.document_type}: {member.document_number}</TableCell>
                                 <TableCell>{member.shares}</TableCell>
                                 <TableCell>
-                                    {/* <Button onClick={() => onEdit(member, {})} variant="outline" size="sm" className="mr-2">
+                                    <Button onClick={() => onEdit(member, {})} variant="outline" size="sm" className="mr-2">
                                       <EditIcon className="h-4 w-4" />
-                                  </Button> */}
+                                  </Button>
                                     <Button onClick={() => onDelete(member.id)} variant="outline" size="sm">
                                         <Trash2Icon className="h-4 w-4" />
                                     </Button>

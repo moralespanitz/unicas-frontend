@@ -1,27 +1,21 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import MemberSection from "@/components/MemberSection";
-import PrestamosSection from "@/components/PrestamosSection";
-import MultaSection from "@/components/MultasSection";
 import AcccionesSection from "@/components/AccionesSection";
-import PagosSection from "@/components/PagosSection";
-import CapitalSocialSection from "@/components/CapitalSocialSection";
 import AgendaSection from "@/components/AgendaSection";
-import AsambleaSection from "@/components/AssemblySection";
-import Link from 'next/link';
+import CapitalSocialSection from "@/components/CapitalSocialSection";
+import MemberSection from "@/components/MemberSection";
+import MultaSection from "@/components/MultasSection";
+import PagosSection from "@/components/PagosSection";
+import PrestamosSection from "@/components/PrestamosSection";
 import ResumenSection from '@/components/ResumenSection';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 const UNICAVecinalDashboard = ({ params }: { params: { id: string } }) => {
     const [isClient, setIsClient] = useState(false);
     const [junta, setJunta] = useState<any>();
-    useEffect(() => {
-        setIsClient(true);
-        handleGetJunta();
-    }, []);
-
     const handleGetJunta = () => {
         fetch(`/api/juntas/${params.id}`)
             .then(response => response.json())
@@ -32,6 +26,14 @@ const UNICAVecinalDashboard = ({ params }: { params: { id: string } }) => {
                 console.error('Error fetching junta:', error);
             });
     }
+    
+    useEffect(() => {
+        setIsClient(true);
+        handleGetJunta();
+    }, []);
+
+
+    if (!isClient) { return <h1>Not client</h1> }
     return (
         <div className="container mx-auto p-6 bg-white flex justify-center h-max">
             <Card className="mb-6">
@@ -57,7 +59,7 @@ const UNICAVecinalDashboard = ({ params }: { params: { id: string } }) => {
                             <TabsTrigger value="pagos">Pagos</TabsTrigger>
                             <TabsTrigger value="capital">Capital Social</TabsTrigger>
                             <TabsTrigger value="agenda">Agenda</TabsTrigger>
-                            <TabsTrigger value="asamblea">Asamblea</TabsTrigger>
+                            {/* <TabsTrigger value="asamblea">Asamblea</TabsTrigger> */}
                         </TabsList>
                         <div className="bg-card text-card-foreground rounded-lg p-6">
                             <TabsContent value="resumen">
@@ -83,9 +85,6 @@ const UNICAVecinalDashboard = ({ params }: { params: { id: string } }) => {
                             </TabsContent>
                             <TabsContent value="agenda">
                                 <AgendaSection juntaId={params.id} />
-                            </TabsContent>
-                            <TabsContent value="asamblea">
-                                <AsambleaSection juntaId={params.id} />
                             </TabsContent>
                         </div>
                     </Tabs>

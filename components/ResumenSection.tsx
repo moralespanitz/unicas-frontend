@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Edit, Trash2 } from "lucide-react"
+import { useEffect, useState } from 'react'
 
 const ResumenSection = ({juntaId} : {juntaId: string}) => {
   const [members, setMembers] = useState([])

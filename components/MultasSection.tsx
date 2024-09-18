@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react'; // Added useEffect
-import { useRouter } from 'next/router';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import React, { useEffect, useState } from 'react'; // Added useEffect
 
 export default function MultaSection({ juntaId }: { juntaId: string }) {
   const [member, setMember] = useState('');

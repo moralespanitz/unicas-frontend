@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
     const { getToken } = getAuth(request);
     const token = await getToken({ template: 'test' });
-    const response = await fetch(`http://localhost:8000/api/capital/gasto/`, {
+    const response = await fetch(`https://unicas-backend.onrender.com0/api/capital/gasto/`, {
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
@@ -18,11 +18,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json(capitalSocial);
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest) {
     const { getToken } = getAuth(request);
     const token = await getToken({ template: 'test' });
     const body = await request.json();
-    const response = await fetch(`http://localhost:8000/api/capital/gasto/`, {
+    const response = await fetch(`https://unicas-backend.onrender.com0/api/capital/gasto/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

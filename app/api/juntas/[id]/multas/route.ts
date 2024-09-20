@@ -7,7 +7,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   const { getToken } = getAuth(request);
   const token = await getToken({ template: 'test' });
 
-  const response = await fetch(`https://unicas-backend.onrender.com/api/multas/junta/${params.id}`, {
+  const response = await fetch(`${process.env.BACKEND_API_URL}/api/multas/junta/${params.id}`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest, {params} : {params : {id : stri
     const data = await request.json();
     const body = {...data, junta: params.id}
     const jsonBody = JSON.stringify(body)
-    const response = await fetch('https://unicas-backend.onrender.com/api/multas/', {
+    const response = await fetch(`${process.env.BACKEND_API_URL}/api/multas/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

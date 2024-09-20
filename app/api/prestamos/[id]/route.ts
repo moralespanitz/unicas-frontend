@@ -4,7 +4,7 @@ export async function GET(request: NextRequest, {params} : {params : {id : strin
     try {
         const { getToken } = getAuth(request)
         const token = await getToken({ template: 'test' })
-        const response = await fetch(`https://unicas-backend.onrender.com/api/prestamos/junta/${params.id}/`, {
+        const response = await fetch(`${process.env.BACKEND_API_URL}/api/prestamos/junta/${params.id}/`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',

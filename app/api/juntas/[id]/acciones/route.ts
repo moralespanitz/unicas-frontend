@@ -7,7 +7,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   const { getToken } = getAuth(request);
   const token = await getToken({ template: 'test' });
 
-  const response = await fetch(`https://unicas-backend.onrender.com/api/acciones/junta/${params.id}`, {
+  const response = await fetch(`${process.env.BACKEND_API_URL}/api/acciones/junta/${params.id}`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       "junta": data.junta
     }
     console.log(jsonBody);
-    const response = await fetch('https://unicas-backend.onrender.com/api/acciones/', {
+    const response = await fetch(`${process.env.BACKEND_API_URL}/api/acciones/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     const { getToken } = getAuth(request);
     const token = await getToken({ template: 'test' });
     const data = await request.json();
-    const response = await fetch(`https://unicas-backend.onrender.com/api/acciones/${data.id}/delete/`, {
+    const response = await fetch(`${process.env.BACKEND_API_URL}/api/acciones/${data.id}/delete/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

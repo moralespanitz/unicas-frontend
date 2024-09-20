@@ -4,7 +4,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     try {
         const { getToken } = getAuth(request)
         const token = await getToken({ template: 'test' })
-        const response = await fetch(`https://unicas-backend.onrender.com/api/junta-users/${params.id}/`, {
+        const response = await fetch(`${process.env.BACKEND_API_URL}/api/junta-users/${params.id}/`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         )
         console.log('Parser body', parserBody)
 
-        const response = await fetch('https://unicas-backend.onrender.com/api/users/', {
+        const response = await fetch(`${process.env.BACKEND_API_URL}/api/users/`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
             }
         ))
 
-        const newResponse = await fetch('https://unicas-backend.onrender.com/api/juntas/add', {
+        const newResponse = await fetch(`${process.env.BACKEND_API_URL}/api/juntas/add`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -85,7 +85,7 @@ export async function DELETE(request: NextRequest) {
     const requestBody = await request.json()
     console.log(requestBody)
     if (requestBody.id) {
-        const response = await fetch(`https://unicas-backend.onrender.com/api/users/${requestBody.id}/`, {
+        const response = await fetch(`${process.env.BACKEND_API_URL}/api/users/${requestBody.id}/`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,

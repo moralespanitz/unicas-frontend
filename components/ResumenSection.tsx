@@ -10,48 +10,44 @@ const ResumenSection = ({ juntaId } : { juntaId: string }) => {
   const [acciones, setAcciones] = useState<any[]>([]);
   const [pagos, setPagos] = useState<any[]>([]);
   const [capital, setCapital] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true); // Loading state
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true); // Start loading
       try {
         const membersResponse = await fetch(`/api/members/${juntaId}`);
-        const loansResponse = await fetch(`/api/prestamos/${juntaId}`);
-        const multasResponse = await fetch(`/api/juntas/${juntaId}/multas`);
-        const accionesResponse = await fetch(`/api/juntas/${juntaId}/acciones`);
-        const pagosResponse = await fetch(`/api/juntas/${juntaId}/pagos`);
-        const capitalResponse = await fetch(`/api/juntas/${juntaId}/capital`);
-
         const membersData = await membersResponse.json();
+        setMembers(membersData);
+
+        const loansResponse = await fetch(`/api/prestamos/${juntaId}`);
         const loansData = await loansResponse.json();
+        setLoans(loansData);
+
+        const multasResponse = await fetch(`/api/juntas/${juntaId}/multas`);
         const multasData = await multasResponse.json();
+        setMultas(multasData);
+
+        const accionesResponse = await fetch(`/api/juntas/${juntaId}/acciones`);
         const accionesData = await accionesResponse.json();
+        setAcciones(accionesData);
+
+        const pagosResponse = await fetch(`/api/juntas/${juntaId}/pagos`);
         const pagosData = await pagosResponse.json();
+
+        const capitalResponse = await fetch(`/api/juntas/${juntaId}/capital`);
         const capitalData = await capitalResponse.json();
 
-        setMembers(membersData);
-        setLoans(loansData);
-        setMultas(multasData);
-        setAcciones(accionesData);
         setPagos(pagosData);
-        setCapital(capitalData);
+        // setCapital(capitalData);
       } catch (error) {
         console.error('Error fetching data:', error);
-      } finally {
-        setIsLoading(false); // End loading
       }
     }
 
     fetchData();
   }, [juntaId]);
 
-  if (isLoading) {
-    return <div>Loading...</div>; // Loading message
-  }
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" key={JSON.stringify(members)}>
       <h2 className="text-2xl font-bold mb-4">Resumen de Junta</h2>
       <div>
         <h3 className="text-xl font-semibold">Lista de Socios</h3>

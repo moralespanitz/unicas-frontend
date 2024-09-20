@@ -17,8 +17,8 @@ export function JuntaCard({ junta, onSelectJunta, onDeleteJunta }: { junta: Junt
       <CardContent>
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <span className="flex items-center"><DollarSignIcon className="mr-2 h-4 w-4" />Total ahorrado: S/.{totalSavings}</span>
-            <span className="flex items-center"><UserIcon className="mr-2 h-4 w-4" />{junta.members.length} miembros</span>
+            <span className="flex items-center">Capital Social: S/.{totalSavings}</span>
+            <span className="flex items-center"><UserIcon className="mr-2 h-4 w-4" />{junta.members.length} socios</span>
           </div>
           <Progress value={progress} className="w-full" />
           <p>Mes actual: {junta.current_month} de {junta.duration_months}</p>

@@ -1,92 +1,114 @@
-'use client';
-import AcccionesSection from "@/components/AccionesSection";
-import AgendaSection from "@/components/AgendaSection";
-import CapitalSocialSection from "@/components/CapitalSocialSection";
-import MemberSection from "@/components/MemberSection";
-import MultaSection from "@/components/MultasSection";
-import PagosSection from "@/components/PagosSection";
-import PrestamosSection from "@/components/PrestamosSection";
-import ResumenSection from '@/components/ResumenSection';
+"use client"
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { ChevronLeft, Home, User, DollarSign, AlertTriangle, TrendingUp, CreditCard, Briefcase, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Skeleton } from "@/components/ui/skeleton";
+import ResumenSection from '@/components/ResumenSection';
+import MemberSection from "@/components/MemberSection";
+import PrestamosSection from "@/components/PrestamosSection";
+import MultaSection from "@/components/MultasSection";
+import AcccionesSection from "@/components/AccionesSection";
+import PagosSection from "@/components/PagosSection";
+import CapitalSocialSection from "@/components/CapitalSocialSection";
+import AgendaSection from "@/components/AgendaSection";
 
 const UNICAVecinalDashboard = ({ params }: { params: { id: string } }) => {
     const [isClient, setIsClient] = useState(false);
-    const [junta, setJunta] = useState<any>();
+    const [junta, setJunta] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
     const handleGetJunta = () => {
+        setIsLoading(true);
         fetch(`/api/juntas/${params.id}`)
             .then(response => response.json())
             .then(data => {
-                setJunta(data)
+                setJunta(data);
+                setIsLoading(false);
             })
             .catch(error => {
                 console.error('Error fetching junta:', error);
+                setIsLoading(false);
             });
     }
     
     useEffect(() => {
         setIsClient(true);
         handleGetJunta();
-    }, []);
+    }, [params.id]);
 
+    if (!isClient) return null;
 
-    if (!isClient) { return <h1>Not client</h1> }
+    const tabItems = [
+        { value: "resumen", label: "Resumen", icon: Home },
+        { value: "socios", label: "Socios", icon: User },
+        { value: "prestamos", label: "Préstamos", icon: DollarSign },
+        { value: "multas", label: "Multas", icon: AlertTriangle },
+        { value: "acciones", label: "Acciones", icon: TrendingUp },
+        { value: "pagos", label: "Pagos", icon: CreditCard },
+        { value: "capital", label: "Capital Social", icon: Briefcase },
+        { value: "agenda", label: "Agenda", icon: Calendar },
+    ];
+
     return (
-        <div className="container mx-auto p-6 bg-white flex justify-center h-max">
-            <Card className="mb-6">
-                <CardHeader>
-                    <CardTitle className="text-3xl font-bold">UNICA Vecinal 2023</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className='flex flex-row items-center justify-between'>
-                        <div className='mb-4'>
-                            <h1 className='text-xl font-semibold'>{junta ? junta.name : 'No junta'} </h1>
-                        </div>
+        <div className="container mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen">
+            <Card className="mb-6 shadow-lg">
+                <CardHeader className="bg-primary text-primary-foreground">
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="text-2xl sm:text-3xl font-bold">UNICA Vecinal Dashboard</CardTitle>
                         <Link href="/">
-                            <Button variant="outline" className="mb-4">Todas las juntas</Button>
+                            <Button variant="secondary" size="sm" className="hidden sm:flex items-center gap-2">
+                                <ChevronLeft className="w-4 h-4" />
+                                Todas las juntas
+                            </Button>
                         </Link>
                     </div>
+                </CardHeader>
+                <CardContent className="pt-6">
+                    {isLoading ? (
+                        <Skeleton className="h-8 w-2/3 mb-4" />
+                    ) : (
+                        <h2 className="text-xl font-semibold mb-4">{junta ? junta.name : 'No junta encontrada'}</h2>
+                    )}
                     <Tabs defaultValue="resumen" className="w-full">
-                        <TabsList className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2 mb-6">
-                            <TabsTrigger value="resumen">Resumen</TabsTrigger>
-                            <TabsTrigger value="miembros">Miembros</TabsTrigger>
-                            <TabsTrigger value="prestamos">Préstamos</TabsTrigger>
-                            <TabsTrigger value="multas">Multas</TabsTrigger>
-                            <TabsTrigger value="acciones">Acciones</TabsTrigger>
-                            <TabsTrigger value="pagos">Pagos</TabsTrigger>
-                            <TabsTrigger value="capital">Capital Social</TabsTrigger>
-                            <TabsTrigger value="agenda">Agenda</TabsTrigger>
-                            {/* <TabsTrigger value="asamblea">Asamblea</TabsTrigger> */}
+                        <TabsList className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 mb-6">
+                            {tabItems.map((item) => (
+                                <TabsTrigger key={item.value} value={item.value} className="flex items-center gap-2">
+                                    <item.icon className="w-4 h-4" />
+                                    <span className="hidden sm:inline">{item.label}</span>
+                                </TabsTrigger>
+                            ))}
                         </TabsList>
-                        <div className="bg-card text-card-foreground rounded-lg p-6">
-                            <TabsContent value="resumen">
-                                <ResumenSection juntaId={params.id} />
-                            </TabsContent>
-                            <TabsContent value="miembros">
-                                <MemberSection juntaId={params.id} />
-                            </TabsContent>
-                            <TabsContent value="prestamos">
-                                <PrestamosSection juntaId={params.id} />
-                            </TabsContent>
-                            <TabsContent value="multas">
-                                <MultaSection juntaId={params.id} />
-                            </TabsContent>
-                            <TabsContent value="acciones">
-                                <AcccionesSection juntaId={params.id} />
-                            </TabsContent>
-                            <TabsContent value="pagos">
-                                <PagosSection juntaId={params.id} />
-                            </TabsContent>
-                            <TabsContent value="capital">
-                                <CapitalSocialSection juntaId={params.id} />
-                            </TabsContent>
-                            <TabsContent value="agenda">
-                                <AgendaSection juntaId={params.id} />
-                            </TabsContent>
-                        </div>
+                        <Card className="bg-white shadow-sm">
+                            <CardContent className="p-4 sm:p-6">
+                                <TabsContent value="resumen">
+                                    <ResumenSection juntaId={params.id} />
+                                </TabsContent>
+                                <TabsContent value="socios">
+                                    <MemberSection juntaId={params.id} />
+                                </TabsContent>
+                                <TabsContent value="prestamos">
+                                    <PrestamosSection juntaId={params.id} />
+                                </TabsContent>
+                                <TabsContent value="multas">
+                                    <MultaSection juntaId={params.id} />
+                                </TabsContent>
+                                <TabsContent value="acciones">
+                                    <AcccionesSection juntaId={params.id} />
+                                </TabsContent>
+                                <TabsContent value="pagos">
+                                    <PagosSection juntaId={params.id} />
+                                </TabsContent>
+                                <TabsContent value="capital">
+                                    <CapitalSocialSection juntaId={params.id} />
+                                </TabsContent>
+                                <TabsContent value="agenda">
+                                    <AgendaSection juntaId={params.id} />
+                                </TabsContent>
+                            </CardContent>
+                        </Card>
                     </Tabs>
                 </CardContent>
             </Card>

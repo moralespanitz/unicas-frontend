@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import React, { useEffect, useState } from 'react'; // Added useEffect
+import React, { useEffect, useState } from 'react';
 
 export default function MultaSection({ juntaId }: { juntaId: string }) {
   const [member, setMember] = useState('');
@@ -11,10 +11,12 @@ export default function MultaSection({ juntaId }: { juntaId: string }) {
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [multas, setMultas] = useState<any[]>([]);
-  const [members, setMembers] = useState<any[]>([]); // Added state for members
+  const [members, setMembers] = useState<any[]>([]);
+  const [reason, setReason] = useState<string>('');
 
-  useEffect(() => { // Added useEffect to fetch members
+  useEffect(() => {
     const fetchMembers = async () => {
+      setIsLoading(true);
       try {
         const response = await fetch(`/api/members/${juntaId}`);
         if (!response.ok) throw new Error('Failed to fetch members');
@@ -22,9 +24,13 @@ export default function MultaSection({ juntaId }: { juntaId: string }) {
         setMembers(data);
       } catch (error) {
         console.error('Error fetching members:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
+
     const fetchMultas = async () => {
+      setIsLoading(true);
       try {
         const response = await fetch(`/api/juntas/${juntaId}/multas`);
         if (!response.ok) throw new Error('Failed to fetch multas');
@@ -32,20 +38,22 @@ export default function MultaSection({ juntaId }: { juntaId: string }) {
         setMultas(data);
       } catch (error) {
         console.error('Error fetching multas:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    setIsLoading(true);
+
     fetchMembers();
     fetchMultas();
-    setIsLoading(false);
-  }, []);
+  }, [juntaId]);
 
   const handlePayMulta = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent form submission
+    e.preventDefault();
+    console.log('Reason', reason);
     const response = await fetch(`/api/juntas/${juntaId}/multas`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reason: description, amount: amount, member: member }), // Updated fields
+      body: JSON.stringify({ reason: reason, amount: amount, member: member, comment: description }),
     });
 
     if (response.ok) {
@@ -56,9 +64,19 @@ export default function MultaSection({ juntaId }: { juntaId: string }) {
       setAmount('');
     }
   };
-  if (isLoading) {
-    return <h1>Loading...</h1>
-  }
+
+  const handleDeleteMulta = async (multaId: number) => {
+    const response = await fetch(`/api/juntas/${juntaId}/multas/${multaId}`, {
+      method: 'DELETE',
+    });
+
+    if (response.ok) {
+      setMultas(multas.filter(multa => multa.id !== multaId));
+    } else {
+      console.error('Failed to delete multa');
+    }
+  };
+
   return (
     <div className="space-y-8">
       <Card>
@@ -66,36 +84,52 @@ export default function MultaSection({ juntaId }: { juntaId: string }) {
           <CardTitle>Pagar Multa</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={handlePayMulta}> {/* Added onSubmit */}
-            <Select onValueChange={setMember} value={member}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar miembro" />
-              </SelectTrigger>
-              <SelectContent>
-                {members.length > 0 ? ( // Updated to display fetched members
-                  members.map((member) => (
-                    <SelectItem key={member.id} value={member.id.toString()}>
-                      {member.full_name}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <SelectItem value="No members" disabled>No hay miembros disponibles</SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-            <Input
-              placeholder="Descripción"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-            <Input
-              type="number"
-              placeholder="Monto"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-            <Button onClick={handlePayMulta}>Pagar Multa</Button>
-          </form>
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : (
+            <form className="space-y-4" onSubmit={handlePayMulta}>
+              <Select onValueChange={setMember} value={member}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar miembro" />
+                </SelectTrigger>
+                <SelectContent>
+                  {members.length > 0 ? (
+                    members.map((member) => (
+                      <SelectItem key={member.id} value={member.id.toString()}>
+                        {member.full_name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="No members" disabled>No hay socios disponibles</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+
+              <Select onValueChange={setReason} value={reason}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Motivo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="TARDANZA">Tardanza</SelectItem>
+                  <SelectItem value="INASISTENCIA">Inasistencia</SelectItem>
+                  <SelectItem value="OTROS">Otros</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Input
+                placeholder="Comentarios"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+              <Input
+                type="number"
+                placeholder="Monto"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+              <Button onClick={handlePayMulta}>Pagar Multa</Button>
+            </form>
+          )}
         </CardContent>
       </Card>
 
@@ -104,26 +138,35 @@ export default function MultaSection({ juntaId }: { juntaId: string }) {
           <CardTitle>Historial de Multas</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Miembro</TableHead>
-                <TableHead>Descripción</TableHead>
-                <TableHead>Monto</TableHead>
-                <TableHead>Estado</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {multas.map((multa, index) => (
-                <TableRow key={index}>
-                  <TableCell>{multa.member}</TableCell> {/* Assuming member is static for display */}
-                  <TableCell>{multa.reason}</TableCell> {/* Updated field */}
-                  <TableCell>{multa.amount}</TableCell>
-                  <TableCell>{multa.status}</TableCell>
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : multas.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Miembro</TableHead>
+                  <TableHead>Descripción</TableHead>
+                  <TableHead>Monto</TableHead>
+                  <TableHead>Estado</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {multas.map((multa) => (
+                  <TableRow key={multa.id}>
+                    <TableCell>{multa.member_name}</TableCell>
+                    <TableCell>{multa.reason}</TableCell>
+                    <TableCell>{multa.amount}</TableCell>
+                    <TableCell>{multa.status}</TableCell>
+                    <TableCell>
+                      <Button onClick={() => handleDeleteMulta(multa.id)}>Eliminar</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div>No fines available.</div>
+          )}
         </CardContent>
       </Card>
     </div>

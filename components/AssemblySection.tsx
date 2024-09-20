@@ -92,7 +92,7 @@ export default function AsambleaSection({juntaId} : {juntaId: string}) {
       console.error('Error fetching members:', error);
       toast({
         title: "Error",
-        description: "No se pudieron cargar los miembros.",
+        description: "No se pudieron cargar los socios.",
         variant: "destructive",
       });
     }

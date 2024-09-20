@@ -20,23 +20,28 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   return NextResponse.json(multas);
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, {params} : {params : {id : string}}) {
   try {
     const { getToken } = getAuth(request);
     const token = await getToken({ template: 'test' });
     const data = await request.json();
+    const body = {...data, junta: params.id}
+    const jsonBody = JSON.stringify(body)
     const response = await fetch('https://unicas-backend.onrender.com/api/multas/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(body),
     });
+
+    const message = await response.json();
+    console.log(message);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return NextResponse.json(data, { status: 201 });
+    return NextResponse.json(message, { status: 201 });
   } catch (error) {
     console.error('Error posting multa:', error);
     return NextResponse.json({ error: 'Failed to post multa' }, { status: 500 });

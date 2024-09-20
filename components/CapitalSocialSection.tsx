@@ -37,6 +37,7 @@ const registerExpenseSchema = z.object({
 export default function CapitalSocialSection({ juntaId }: { juntaId: string }) {
   const [capitalData, setCapitalData] = useState<CapitalData>();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true); // Loading state
 
   const addCapitalForm = useForm<z.infer<typeof addCapitalSchema>>({
     resolver: zodResolver(addCapitalSchema),
@@ -55,12 +56,8 @@ export default function CapitalSocialSection({ juntaId }: { juntaId: string }) {
       description: "",
     },
   });
-
-  useEffect(() => {
-    fetchCapitalData();
-  }, []);
-
   const fetchCapitalData = async () => {
+    setIsLoading(true);
     try {
       const response = await fetch(`/api/juntas/${juntaId}/capital`);
       if (response.ok) {
@@ -69,8 +66,15 @@ export default function CapitalSocialSection({ juntaId }: { juntaId: string }) {
       }
     } catch (error) {
       console.error('Error fetching capital data:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    
+    fetchCapitalData();
+  }, [juntaId]);
 
   const onAddCapital = async (values: z.infer<typeof addCapitalSchema>) => {
     try {
@@ -132,8 +136,9 @@ export default function CapitalSocialSection({ juntaId }: { juntaId: string }) {
       });
     }
   };
-  if (!capitalData) {
-    return <div>Loading...</div>;
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Loading message
   }
 
   return (
@@ -144,8 +149,14 @@ export default function CapitalSocialSection({ juntaId }: { juntaId: string }) {
       <CardContent className="space-y-6">
         <div>
           <h3 className="text-lg font-semibold">Capital Actual</h3>
-          <p>Reserva Legal: S/{capitalData.reserva_legal}</p>
-          <p>Fondo Social: S/{capitalData.fondo_social}</p>
+          {capitalData ? (
+            <>
+              <p>Reserva Legal: S/{capitalData.reserva_legal}</p>
+              <p>Fondo Social: S/{capitalData.fondo_social}</p>
+            </>
+          ) : (
+            <p>No capital data available</p>
+          )}
         </div>
         <Form {...addCapitalForm}>
           <form onSubmit={addCapitalForm.handleSubmit(onAddCapital)} className="space-y-4">

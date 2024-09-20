@@ -44,6 +44,9 @@ interface LoanPayment {
   remaining_installments: number; // Updated field
   member: number; // Updated field
   junta: number; // Updated field
+  member_name: string; // Updated field
+  cuota: number; // Updated field
+  fecha_pago: string; // Updated field
 }
 
 
@@ -59,6 +62,7 @@ export default function PagosSection({juntaId} : {juntaId: string}) {
   const [loans, setLoans] = useState<Loan[]>([]);
   const [prestamos, setPrestamos] = useState<LoanPayment[]>([]);
   const [history, setHistory] = useState<LoanPayment[]>([]);
+  const [selectedMember, setSelectedMember] = useState<string | null>(null); // New state for selected member
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -71,12 +75,16 @@ export default function PagosSection({juntaId} : {juntaId: string}) {
   });
 
   useEffect(() => {
-    setIsLoading(true);
-    handleGetMembers();
-    fetchPrestamos()
-    fetchHistory();
-    setIsLoading(false);
-  }, []);
+    const fetchData = async () => {
+      setIsLoading(true);
+      await handleGetMembers();
+      await fetchPrestamos();
+      await fetchHistory();
+      setIsLoading(false);
+    };
+    fetchData();
+  }, [juntaId]);
+
   const handleGetMembers = async () => {
     const response = await fetch(`/api/members/${juntaId}`);
     if (response.ok) {
@@ -104,7 +112,16 @@ export default function PagosSection({juntaId} : {juntaId: string}) {
     }
   };
 
-   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!prestamos.some(prestamo => prestamo.member === Number(selectedMember))) {
+      toast({
+        title: "Error",
+        description: "No hay prestamos disponibles para el miembro seleccionado.",
+        variant: "destructive",
+      });
+      return; // Prevent submission if no loans are available
+    }
+
     const response = await fetch(`/api/juntas/${juntaId}/pagos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -133,95 +150,111 @@ export default function PagosSection({juntaId} : {juntaId: string}) {
           <CardTitle>Pago a Cuenta de Préstamos</CardTitle>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Fecha de Pago</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Fecha de Pago</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={`w-full pl-3 text-left font-normal ${!field.value && "text-muted-foreground"
+                                }`}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Seleccionar fecha</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="member"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Miembro</FormLabel>
+                      <Select 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          setSelectedMember(value); // Update selected member state
+                        }} 
+                        defaultValue={field.value}
+                      >
                         <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={`w-full pl-3 text-left font-normal ${!field.value && "text-muted-foreground"
-                              }`}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Seleccionar fecha</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar miembro" />
+                          </SelectTrigger>
                         </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) =>
-                            date > new Date() || date < new Date("1900-01-01")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="member"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Miembro</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar miembro" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {members.map((member) => (
-                          <SelectItem key={member.id} value={member.id.toString()} >{member.full_name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <SelectContent>
+                          {members.map((member) => (
+                            <SelectItem key={member.id} value={member.id.toString()}>{member.full_name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="loan"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Préstamo</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar préstamo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {prestamos.map((prestamo) => (
-                          <SelectItem key={prestamo.id} value={prestamo.id.toString()}>{prestamo.id}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">Realizar Pago</Button>
-            </form>
-          </Form>
+                <FormField
+                  control={form.control}
+                  name="loan"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Préstamo</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedMember}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar préstamo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {prestamos.filter(prestamo => prestamo.member === Number(selectedMember)).length > 0 ? (
+                            prestamos
+                              .filter(prestamo => prestamo.member === Number(selectedMember))
+                              .map((prestamo) => (
+                                <SelectItem key={prestamo.id} value={prestamo.id.toString()}>{prestamo.amount} soles - {prestamo.member_name} - {prestamo.request_date}</SelectItem>
+                              ))
+                          ) : (
+                            <SelectItem value='No hay prestamos' disabled>No hay prestamos</SelectItem> // Display message if no loans
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit">Realizar Pago</Button>
+              </form>
+            </Form>
+          )}
         </CardContent>
       </Card>
 
@@ -230,26 +263,30 @@ export default function PagosSection({juntaId} : {juntaId: string}) {
           <CardTitle>Historial de Pagos de Préstamos</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Préstamo</TableHead>
-                <TableHead>Monto Cuota</TableHead>
-                <TableHead>Monto Interés</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {history.map((item) => (
-                <TableRow key={item.id}>
-                  {/* <TableCell>{format(new Date(item.request_date), "yyyy-MM-dd HH:mm:ss")}</TableCell> */}
-                  <TableCell>{item.id}</TableCell>
-                  <TableCell>S/{item.amount}</TableCell>
-                  <TableCell>S/{item.remaining_amount}</TableCell>
+          {history.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Préstamo</TableHead>
+                  <TableHead>Monto Cuota</TableHead>
+                  <TableHead>Monto Interés</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {history.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{format(new Date(item.fecha_pago), "yyyy-MM-dd HH:mm:ss")}</TableCell>
+                    <TableCell>{item.amount}</TableCell>
+                    <TableCell>S/{item.cuota}</TableCell>
+                    <TableCell>S/{item.monthly_interest}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div>No payment history available.</div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -1,118 +1,209 @@
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Edit, Trash2 } from "lucide-react"
 import { useEffect, useState } from 'react'
+import { format } from "date-fns";
 
-const ResumenSection = ({juntaId} : {juntaId: string}) => {
-  const [members, setMembers] = useState([])
-  const [loans, setLoans] = useState([])
-  const [isLoading, setIsLoading] = useState(true) // {{ edit_1 }}
+const ResumenSection = ({ juntaId } : { juntaId: string }) => {
+  const [members, setMembers] = useState<any[]>([]);
+  const [loans, setLoans] = useState<any[]>([]);
+  const [multas, setMultas] = useState<any[]>([]);
+  const [acciones, setAcciones] = useState<any[]>([]);
+  const [pagos, setPagos] = useState<any[]>([]);
+  const [capital, setCapital] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true); // Loading state
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true) // {{ edit_2 }}
+      setIsLoading(true); // Start loading
       try {
-        const membersResponse = await fetch(`/api/members/${juntaId}`)
-        const membersData = await membersResponse.json()
-        setMembers(membersData)
+        const membersResponse = await fetch(`/api/members/${juntaId}`);
+        const loansResponse = await fetch(`/api/prestamos/${juntaId}`);
+        const multasResponse = await fetch(`/api/juntas/${juntaId}/multas`);
+        const accionesResponse = await fetch(`/api/juntas/${juntaId}/acciones`);
+        const pagosResponse = await fetch(`/api/juntas/${juntaId}/pagos`);
+        const capitalResponse = await fetch(`/api/juntas/${juntaId}/capital`);
+
+        const membersData = await membersResponse.json();
+        const loansData = await loansResponse.json();
+        const multasData = await multasResponse.json();
+        const accionesData = await accionesResponse.json();
+        const pagosData = await pagosResponse.json();
+        const capitalData = await capitalResponse.json();
+
+        setMembers(membersData);
+        setLoans(loansData);
+        setMultas(multasData);
+        setAcciones(accionesData);
+        setPagos(pagosData);
+        setCapital(capitalData);
       } catch (error) {
-        console.error('Error fetching data:', error)
+        console.error('Error fetching data:', error);
       } finally {
-        setIsLoading(false) // {{ edit_3 }}
+        setIsLoading(false); // End loading
       }
     }
 
-    fetchData()
-  }, [])
+    fetchData();
+  }, [juntaId]);
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Loading message
+  }
 
   return (
     <div className="space-y-8">
-      {isLoading ? ( // {{ edit_4 }}
-        <p>Cargando...</p>
-      ) : (
-        <>
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Lista de Miembros</h2>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Documento</TableHead>
-                  <TableHead>Acciones</TableHead>
-                  <TableHead>Opciones</TableHead>
+      <h2 className="text-2xl font-bold mb-4">Resumen de Junta</h2>
+      <div>
+        <h3 className="text-xl font-semibold">Lista de Socios</h3>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Documento</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {members.length > 0 ? (
+              members.map((member: any) => (
+                <TableRow key={member.id}>
+                  <TableCell>{member.full_name}</TableCell>
+                  <TableCell>{member.document_type}: {member.document_number}</TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {members.map((member: any) => (
-                  <TableRow key={member.id}>
-                    <TableCell>{member.full_name}</TableCell>
-                    <TableCell>{member.document_type}: {member.document_number}</TableCell>
-                    <TableCell>{member.shares}</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={2}>Not members</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-          {/* <div>
-            <h2 className="text-2xl font-bold mb-4">Préstamos Activos</h2>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Miembro</TableHead>
-                  <TableHead>Monto Original</TableHead>
-                  <TableHead>Monto Adeudado</TableHead>
-                  <TableHead>Cuotas Pendientes</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Opciones</TableHead>
+      <div>
+        <h3 className="text-xl font-semibold">Préstamos Activos</h3>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Miembro</TableHead>
+              <TableHead>Monto Original</TableHead>
+              <TableHead>Monto Adeudado</TableHead>
+              <TableHead>Cuotas Pendientes</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loans.length > 0 ? (
+              loans.map((loan: any) => (
+                <TableRow key={loan.id}>
+                  <TableCell>{loan.member_name}</TableCell>
+                  <TableCell>S/.{loan.amount}</TableCell>
+                  <TableCell>S/.{loan.remaining_amount}</TableCell>
+                  <TableCell>{loan.remaining_installments}</TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loans.map((loan: any) => (
-                  <TableRow key={loan.id}>
-                    <TableCell>{loan.member}</TableCell>
-                    <TableCell>S/.{loan.amount}</TableCell>
-                    <TableCell>S/.{loan.amount}</TableCell>
-                    <TableCell>{loan.number_of_installments}</TableCell>
-                    <TableCell>{loan.approved ? "Aprobado" : "No aprobado"}</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div> */}
-          {/* <div>
-            <h2 className="text-2xl font-bold mb-4">Tabla General de Miembros</h2>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Acciones</TableHead>
-                  <TableHead>Valor en Soles</TableHead>
-                  <TableHead>Multas Pagadas</TableHead>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4}>Not loans</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div>
+        <h3 className="text-xl font-semibold">Historial de Multas</h3>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Miembro</TableHead>
+              <TableHead>Descripción</TableHead>
+              <TableHead>Monto</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {multas.length > 0 ? (
+              multas.map((multa: any) => (
+                <TableRow key={multa.id}>
+                  <TableCell>{multa.member_name}</TableCell>
+                  <TableCell>{multa.reason}</TableCell>
+                  <TableCell>S/.{multa.amount}</TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {generalTable.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.name}</TableCell>
-                    <TableCell>{item.actions}</TableCell>
-                    <TableCell>{item.value}</TableCell>
-                    <TableCell>{item.finesPaid}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div> */}
-        </>
-      )}
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={3}>Not multas</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div>
+        <h3 className="text-xl font-semibold">Acciones Compradas</h3>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Miembro</TableHead>
+              <TableHead>Cantidad</TableHead>
+              <TableHead>Valor</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {acciones.length > 0 ? (
+              acciones.map((accion: any) => (
+                <TableRow key={accion.id}>
+                  <TableCell>{accion.member_name}</TableCell>
+                  <TableCell>{accion.quantity}</TableCell>
+                  <TableCell>S/.{accion.value}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={3}>Not acciones</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div>
+        <h3 className="text-xl font-semibold">Historial de Pagos</h3>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Miembro</TableHead>
+              <TableHead>Monto</TableHead>
+              <TableHead>Fecha</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {pagos.length > 0 ? (
+              pagos.map((pago: any) => (
+                <TableRow key={pago.id}>
+                  <TableCell>{pago.member_name}</TableCell>
+                  <TableCell>S/.{pago.amount}</TableCell>
+                  <TableCell>{format(new Date(pago.fecha_pago), "yyyy-MM-dd")}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={3}>Not pagos</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div>
+        <h3 className="text-xl font-semibold">Capital Social</h3>
+        {capital ? (
+          <>
+            <p>Reserva Legal: S/{capital.reserva_legal}</p>
+            <p>Fondo Social: S/{capital.fondo_social}</p>
+          </>
+        ) : (
+          <p>No capital data available</p>
+        )}
+      </div>
     </div>
   )
 }

@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
       "value": data.value,
       "junta": data.junta
     }
+    console.log(jsonBody);
     const response = await fetch('https://unicas-backend.onrender.com/api/acciones/', {
       method: 'POST',
       headers: {
@@ -42,6 +43,8 @@ export async function POST(request: NextRequest) {
         jsonBody
       ),
     });
+    const message = await response.json();
+    console.log(message);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -49,5 +52,28 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error posting accion:', error);
     return NextResponse.json({ error: 'Failed to post accion' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const { getToken } = getAuth(request);
+    const token = await getToken({ template: 'test' });
+    const data = await request.json();
+    const response = await fetch(`https://unicas-backend.onrender.com/api/acciones/${data.id}/delete/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return NextResponse.json({ message: 'Accion deleted successfully' }, { status: 200 });
+  } catch (error) {
+    console.error('Error deleting accion:', error);
+    return NextResponse.json({ error: 'Failed to delete accion' }, { status: 500 });
   }
 }

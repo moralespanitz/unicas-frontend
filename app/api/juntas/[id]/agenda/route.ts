@@ -50,12 +50,14 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function PUT(request: NextRequest) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { getToken } = getAuth(request);
     const token = await getToken({ template: 'test' });
     const data = await request.json();
-    const { id, content, juntaId } = data; // Assuming id is sent in the request body
+    const { id, content } = data; // Assuming id is sent in the request body
+    console.log(params.id);
+    console.log(content);
 
     const response = await fetch(`https://unicas-backend.onrender.com/api/agenda/${id}/`, {
       method: 'PUT',
@@ -64,8 +66,8 @@ export async function PUT(request: NextRequest) {
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
-        junta: juntaId,
-        content: content
+        junta: params.id,
+        content: content,
       }),
     });
     if (!response.ok) {

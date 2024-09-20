@@ -11,6 +11,8 @@ export async function GET(request: NextRequest, {params} : {params : {id : strin
             }
         })
         const users = await response.json();
+        console.log("Here");
+        console.log(users);
         return NextResponse.json(users)
     } catch (error) {
         console.error('Error handling GET request:', error);

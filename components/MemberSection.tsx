@@ -11,7 +11,7 @@ function MembersList({ members, onEdit, onDelete }: { members: any[]; onEdit: (m
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Lista de Miembros</CardTitle>
+                <CardTitle>Lista de socios</CardTitle>
             </CardHeader>
             <CardContent>
                 <Table>
@@ -30,9 +30,9 @@ function MembersList({ members, onEdit, onDelete }: { members: any[]; onEdit: (m
                                 <TableCell>{member.document_type}: {member.document_number}</TableCell>
                                 <TableCell>{member.shares}</TableCell>
                                 <TableCell>
-                                    <Button onClick={() => onEdit(member, {})} variant="outline" size="sm" className="mr-2">
-                                      <EditIcon className="h-4 w-4" />
-                                  </Button>
+                                    {/* <Button onClick={() => onEdit(member, {})} variant="outline" size="sm" className="mr-2">
+                                        <EditIcon className="h-4 w-4" />
+                                    </Button> */}
                                     <Button onClick={() => onDelete(member.id)} variant="outline" size="sm">
                                         <Trash2Icon className="h-4 w-4" />
                                     </Button>
@@ -46,7 +46,7 @@ function MembersList({ members, onEdit, onDelete }: { members: any[]; onEdit: (m
     )
 }
 
-const MemberSection = ({juntaId} : {juntaId: string}) => {
+const MemberSection = ({ juntaId }: { juntaId: string }) => {
     const [newMember, setNewMember] = useState({
         full_name: '',
         document_type: 'DNI' as 'DNI' | 'CE',
@@ -55,7 +55,7 @@ const MemberSection = ({juntaId} : {juntaId: string}) => {
         province: '',
         district: '',
         address: '',
-        is_staff: false
+        is_superuser: false
     });
 
     const [members, setMembers] = useState<any>([]);
@@ -157,9 +157,15 @@ const MemberSection = ({juntaId} : {juntaId: string}) => {
                                 <Label htmlFor="address">Dirección</Label>
                                 <Input id="address" value={newMember.address} onChange={(e) => setNewMember({ ...newMember, address: e.target.value })} />
                             </div>
-                            <div className="col-span-2">
-                                <Label htmlFor="isAdmin">
-                                    <Input id="isAdmin" type="checkbox" checked={newMember.is_staff} onChange={(e) => setNewMember({ ...newMember, is_staff: e.target.checked })} />
+                            <div className="col-span-2 flex items-center space-x-2">
+                                <Input
+                                    id="isAdmin"
+                                    type="checkbox"
+                                    checked={newMember.is_superuser}
+                                    onChange={(e) => setNewMember({ ...newMember, is_superuser: e.target.checked })}
+                                    className="h-4 w-4"
+                                />
+                                <Label htmlFor="isAdmin" className="text-sm">
                                     Es Administrador
                                 </Label>
                             </div>

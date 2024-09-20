@@ -33,7 +33,7 @@ interface NuevoPrestamoForm {
 }
 
 const PrestamosSection = ({ juntaId }: { juntaId: string }) => {
-    const [prestamos, setPrestamos] = useState<LoanPayment[]>([]);
+    const [prestamos, setPrestamos] = useState<any[]>([]);
     const [members, setMembers] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [nuevoPrestamoForm, setNuevoPrestamoForm] = useState<NuevoPrestamoForm>(
@@ -160,7 +160,7 @@ const PrestamosSection = ({ juntaId }: { juntaId: string }) => {
                                                 </SelectItem>
                                             ))
                                         ) : (
-                                            <SelectItem value="No members" disabled>No hay miembros disponibles</SelectItem>
+                                            <SelectItem value="No members" disabled>No hay socios disponibles</SelectItem>
                                         )}
                                     </SelectContent>
                                 </Select>
@@ -206,11 +206,11 @@ const PrestamosSection = ({ juntaId }: { juntaId: string }) => {
                         <TableBody>
                             {prestamos.length > 0 && prestamos.map((prestamo) => (
                                 <TableRow key={prestamo.id}>
-                                    <TableCell>{prestamo.member}</TableCell>
-                                    <TableCell>S/.{prestamo.request_date}</TableCell>
+                                    <TableCell>{prestamo.member_name}</TableCell>
                                     <TableCell>S/.{prestamo.amount}</TableCell>
+                                    <TableCell>S/.{prestamo.remaining_amount}</TableCell>
                                     <TableCell>{prestamo.remaining_installments}</TableCell>
-                                    <TableCell>{prestamo.approved ? "Aceptado" : "Rechazado"}</TableCell>
+                                    <TableCell>{prestamo.status}</TableCell>
                                     <TableCell>
                                         <div className="flex space-x-2">
                                             {/* <Button variant="ghost" size="icon" onClick={() => handleUpdate(prestamo.id)}><Pencil className="h-4 w-4" /></Button> */}

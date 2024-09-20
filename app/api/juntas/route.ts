@@ -18,9 +18,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const { getToken } = getAuth(request)
   const token = await getToken({ template: 'test' })
-  console.log('Token', token)
   const requestBody = await request.json()
-  console.log("Body", requestBody)
   const response = await fetch('https://unicas-backend.onrender.com/api/juntas/', {
     method: 'POST',
     headers: {

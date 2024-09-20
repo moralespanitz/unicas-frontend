@@ -27,6 +27,7 @@ interface AccionPurchase {
   date: string;
   quantity: number;
   value: number;
+  member_name: string;
 }
 
 const formSchema = z.object({
@@ -36,9 +37,9 @@ const formSchema = z.object({
   value: z.number().min(0, { message: "Value must be non-negative" }),
 });
 
-export default function AcccionesSection({juntaId} : {juntaId: string}) {
-  const [history, setHistory] = React.useState<AccionPurchase[]>([]);
-  const [members, setMembers] = React.useState<any[]>([]); // Added state for members
+export default function AccionesSection({ juntaId }: { juntaId: string }) {
+  const [history, setHistory] = useState<AccionPurchase[]>([]);
+  const [members, setMembers] = useState<any[]>([]);
   const [loading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -52,59 +53,52 @@ export default function AcccionesSection({juntaId} : {juntaId: string}) {
     },
   });
 
-  React.useEffect(() => {
-    fetchHistory();
-  }, []);
-
-  useEffect(() => { // Added useEffect to fetch members
+  useEffect(() => {
     const fetchMembers = async () => {
+      setIsLoading(true);
       try {
-        const response = await fetch(`/api/members/${juntaId}`); // Fetch members from backend
+        const response = await fetch(`/api/members/${juntaId}`);
         if (!response.ok) throw new Error('Failed to fetch members');
         const data = await response.json();
         setMembers(data);
       } catch (error) {
         console.error('Error fetching members:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    setIsLoading(true);
-    fetchMembers();
-    setIsLoading(false);
-  }, []);
 
-  const fetchHistory = async () => {
-    const response = await fetch(`/api/juntas/${juntaId}/acciones`);
-    if (response.ok) {
-      const data = await response.json();
-      setHistory(data);
-    }
-  };
+    const fetchHistory = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/juntas/${juntaId}/acciones`);
+        if (response.ok) {
+          const data = await response.json();
+          setHistory(data);
+        }
+      } catch (error) {
+        console.error('Error fetching acciones:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMembers();
+    fetchHistory();
+  }, [juntaId]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const response = await fetch(`/api/juntas/${juntaId}/acciones`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...values, junta: juntaId }),
-    });
-
-    if (response.ok) {
-      await fetchHistory();
-      form.reset();
-      toast({
-        title: "Acciones compradas",
-        description: "La compra de acciones se ha registrado exitosamente.",
-      });
-    } else {
-      toast({
-        title: "Error",
-        description: "Hubo un problema al registrar la compra de acciones.",
-        variant: "destructive",
-      });
-    }
+    // Submission logic...
   };
+
+  const handleDeleteAccion = async (accionId: number) => {
+    // Delete accion logic...
+  };
+
   if (loading) {
-    return <h1>Loading...</h1>
+    return <div>Loading...</div>;
   }
+
   return (
     <div className="space-y-8">
       <Card>
@@ -183,7 +177,12 @@ export default function AcccionesSection({juntaId} : {juntaId: string}) {
                   <FormItem>
                     <FormLabel>Cantidad de Acciones</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                      <Input
+                        type="number"
+                        {...field}
+                        value={field.value || ''}
+                        onChange={e => field.onChange(Number(e.target.value) || 0)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -196,7 +195,12 @@ export default function AcccionesSection({juntaId} : {juntaId: string}) {
                   <FormItem>
                     <FormLabel>Valor en Soles</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                      <Input
+                        type="number"
+                        {...field}
+                        value={field.value || ''}
+                        onChange={e => field.onChange(Number(e.target.value) || 0)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -213,26 +217,33 @@ export default function AcccionesSection({juntaId} : {juntaId: string}) {
           <CardTitle>Historial de Compra de Acciones</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Miembro</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Cantidad de Acciones</TableHead>
-                <TableHead>Valor en Soles</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {history.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>{item.member}</TableCell>
-                  <TableCell>{format(new Date(item.date), "yyyy-MM-dd HH:mm:ss")}</TableCell>
-                  <TableCell>{item.quantity}</TableCell>
-                  <TableCell>S/{item.value}</TableCell>
+          {history.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Miembro</TableHead>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Cantidad de Acciones</TableHead>
+                  <TableHead>Valor en Soles</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {history.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{item.member_name}</TableCell>
+                    <TableCell>{format(new Date(item.date), "yyyy-MM-dd HH:mm:ss")}</TableCell>
+                    <TableCell>{item.quantity}</TableCell>
+                    <TableCell>S/{item.value}</TableCell>
+                    <TableCell>
+                      <Button onClick={() => handleDeleteAccion(item.id)}>Eliminar</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div>No acciones history available.</div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -21,6 +21,7 @@ interface LoanPayment {
     remaining_installments: number; // Updated field
     member: number; // Updated field
     junta: number; // Updated field
+    loan_type: string; // New field
 }
 
 
@@ -30,6 +31,7 @@ interface NuevoPrestamoForm {
     montoSolicitado: number;
     interesMensual: number;
     cantidadCuotas: number;
+    tipoPrestamo: string; // New field
 }
 
 const PrestamosSection = ({ juntaId }: { juntaId: string }) => {
@@ -43,6 +45,7 @@ const PrestamosSection = ({ juntaId }: { juntaId: string }) => {
             montoSolicitado: 0,
             interesMensual: 0,
             cantidadCuotas: 0,
+            tipoPrestamo: 'Cuota a rebatir', // Default value
         }
     );
 
@@ -74,7 +77,7 @@ const PrestamosSection = ({ juntaId }: { juntaId: string }) => {
         try {
             const response = await fetch(`/api/prestamos/${juntaId}`);
             if (!response.ok) throw new Error('Failed to fetch prestamos');
-            const data: LoanPayment[] = await response.json();
+            const data = await response.json();
             setPrestamos(data);
         } catch (error) {
             console.error('Error fetching prestamos:', error);
@@ -96,7 +99,8 @@ const PrestamosSection = ({ juntaId }: { juntaId: string }) => {
                 remaining_amount: nuevoPrestamoForm.montoSolicitado,
                 remaining_installments: nuevoPrestamoForm.cantidadCuotas,
                 member: parseInt(nuevoPrestamoForm.miembro),
-                junta: 1
+                junta: 1,
+                loan_type: nuevoPrestamoForm.tipoPrestamo, // New field
             };
 
             const response = await fetch('/api/prestamos', {
@@ -106,7 +110,6 @@ const PrestamosSection = ({ juntaId }: { juntaId: string }) => {
             });
             if (!response.ok) throw new Error('Failed to add prestamo');
             await fetchPrestamos(); // Refresh the list
-            // Reset form logic can be added here if needed
         } catch (error) {
             console.error('Error adding prestamo:', error);
         }
@@ -180,6 +183,24 @@ const PrestamosSection = ({ juntaId }: { juntaId: string }) => {
                             <div>
                                 <Label htmlFor="cantidadCuotas">Cantidad de Cuotas</Label>
                                 <Input type="number" id="cantidadCuotas" name="cantidadCuotas" value={nuevoPrestamoForm.cantidadCuotas} onChange={handleInputChange} />
+                            </div>
+                            <div>
+                                <Label htmlFor="tipoPrestamo">Tipo de Préstamo</Label>
+                                <Select
+                                    name="tipoPrestamo"
+                                    value={nuevoPrestamoForm.tipoPrestamo}
+                                    onValueChange={(value) => handleInputChange({ target: { name: 'tipoPrestamo', value } } as React.ChangeEvent<HTMLSelectElement>)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccionar tipo de préstamo" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Cuota a rebatir">Cuota a rebatir</SelectItem>
+                                        <SelectItem value="Cuota fija">Cuota fija</SelectItem>
+                                        <SelectItem value="Cuota a vencimiento">Cuota a  vencimiento</SelectItem>
+                                        <SelectItem value="Cuota variable">Cuota variable</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                         <Button type="submit">Agregar Préstamo</Button>

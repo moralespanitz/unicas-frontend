@@ -19,6 +19,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Checkbox } from './ui/checkbox';
+import { Label } from './ui/label';
 
 interface Member {
   id: string;
@@ -47,6 +49,7 @@ interface LoanPayment {
   member_name: string; // Updated field
   cuota: number; // Updated field
   fecha_pago: string; // Updated field
+  loan_type: string; // New field
 }
 
 
@@ -56,7 +59,7 @@ const formSchema = z.object({
   loan: z.string().min(1, { message: "Please select a loan" }),
 });
 
-export default function PagosSection({juntaId} : {juntaId: string}) {
+export default function PagosSection({ juntaId }: { juntaId: string }) {
   const [members, setMembers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -122,10 +125,39 @@ export default function PagosSection({juntaId} : {juntaId: string}) {
       return; // Prevent submission if no loans are available
     }
 
+    const selectedPrestamo = prestamos.find(prestamo => prestamo.id === Number(values.loan));
+    if (!selectedPrestamo) {
+      toast({
+        title: "Error",
+        description: "No se encontró el préstamo seleccionado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    let paymentAmount = selectedPrestamo.cuota;
+    if (selectedPrestamo.loan_type === 'Cuota variable') {
+      // Prompt user to enter custom payment amount for 'Cuota variable'
+      const customAmount = prompt('Ingrese el monto de pago para este préstamo de cuota variable:');
+      if (customAmount !== null) {
+        paymentAmount = parseFloat(customAmount);
+      } else {
+        toast({
+          title: "Error",
+          description: "Debe ingresar un monto de pago para los préstamos de cuota variable.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     const response = await fetch(`/api/juntas/${juntaId}/pagos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(values),
+      body: JSON.stringify({
+        ...values,
+        paymentAmount: paymentAmount,
+      }),
     });
     if (response.ok) {
       await fetchHistory();
@@ -200,11 +232,11 @@ export default function PagosSection({juntaId} : {juntaId: string}) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Miembro</FormLabel>
-                      <Select 
+                      <Select
                         onValueChange={(value) => {
                           field.onChange(value);
                           setSelectedMember(value); // Update selected member state
-                        }} 
+                        }}
                         defaultValue={field.value}
                       >
                         <FormControl>
@@ -213,9 +245,9 @@ export default function PagosSection({juntaId} : {juntaId: string}) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {members.map((member) => (
+                          {members.length > 0 ? members.map((member) => (
                             <SelectItem key={member.id} value={member.id.toString()}>{member.full_name}</SelectItem>
-                          ))}
+                          )) : <div>No members available</div>}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -236,14 +268,19 @@ export default function PagosSection({juntaId} : {juntaId: string}) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {prestamos.filter(prestamo => prestamo.member === Number(selectedMember)).length > 0 ? (
-                            prestamos
-                              .filter(prestamo => prestamo.member === Number(selectedMember))
-                              .map((prestamo) => (
-                                <SelectItem key={prestamo.id} value={prestamo.id.toString()}>{prestamo.amount} soles - {prestamo.member_name} - {prestamo.request_date}</SelectItem>
-                              ))
+                          {
+                            prestamos.length > 0 ? (
+                            prestamos.filter(prestamo => prestamo.member === Number(selectedMember)).length > 0 ? (
+                              prestamos
+                                .filter(prestamo => prestamo.member === Number(selectedMember))
+                                .map((prestamo) => (
+                                  <SelectItem key={prestamo.id} value={prestamo.id.toString()}>{prestamo.amount} soles - {prestamo.member_name} - {prestamo.request_date}</SelectItem>
+                                ))
+                            ) : (
+                              <SelectItem value='No hay prestamos' disabled>No hay prestamos</SelectItem> // Display message if no loans
+                            )
                           ) : (
-                            <SelectItem value='No hay prestamos' disabled>No hay prestamos</SelectItem> // Display message if no loans
+                            <SelectItem value='No hay prestamos' disabled>No hay prestamos</SelectItem>
                           )}
                         </SelectContent>
                       </Select>
@@ -251,6 +288,12 @@ export default function PagosSection({juntaId} : {juntaId: string}) {
                     </FormItem>
                   )}
                 />
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="registrarCuotaDiferente" />
+                  <Label htmlFor="registrarCuotaDiferente">
+                    Registrar cuota diferente
+                  </Label>
+                </div>
                 <Button type="submit">Realizar Pago</Button>
               </form>
             </Form>
@@ -269,6 +312,7 @@ export default function PagosSection({juntaId} : {juntaId: string}) {
                 <TableRow>
                   <TableHead>Fecha</TableHead>
                   <TableHead>Préstamo</TableHead>
+                  <TableHead>Tipo prestamo</TableHead>
                   <TableHead>Monto Cuota</TableHead>
                   <TableHead>Monto Interés</TableHead>
                 </TableRow>
@@ -278,6 +322,7 @@ export default function PagosSection({juntaId} : {juntaId: string}) {
                   <TableRow key={item.id}>
                     <TableCell>{format(new Date(item.fecha_pago), "yyyy-MM-dd HH:mm:ss")}</TableCell>
                     <TableCell>{item.amount}</TableCell>
+                    <TableCell>{item.loan_type}</TableCell>
                     <TableCell>S/{item.cuota}</TableCell>
                     <TableCell>S/{item.monthly_interest}</TableCell>
                   </TableRow>

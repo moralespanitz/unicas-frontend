@@ -121,9 +121,11 @@ export default function AccionesSection({ juntaId }: { juntaId: string }) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {members.map(member => (
+                        {members.length > 0 ? members.map(member => (
                           <SelectItem key={member.id} value={member.id.toString()}>{member.full_name}</SelectItem>
-                        ))}
+                        )) : (
+                          <SelectItem value='No hay miembros' disabled>No hay miembros</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />

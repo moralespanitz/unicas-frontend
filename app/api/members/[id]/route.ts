@@ -20,59 +20,59 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
     try {
-        const { getToken } = getAuth(request)
-        const token = await getToken({ template: 'test' })
-        const requestBody = await request.json()
-        const parserBody = JSON.stringify(
-            {
-                "is_superuser": requestBody.is_superuser,
-                "document_type": requestBody.document_type,
-                "full_name": requestBody.full_name,
-                "document_number": requestBody.document_number,
-                "birth_date": requestBody.birth_date,
-                "province": requestBody.province,
-                "district": requestBody.district,
-                "address": requestBody.address,
-                "username": requestBody.document_number
-            }
-        )
-        console.log('Parser body', parserBody)
+        const { getToken } = getAuth(request);
+        const token = await getToken({ template: 'test' });
+        const requestBody = await request.json();
 
-        const response = await fetch(`${process.env.BACKEND_API_URL}/api/users/`, {
+        // Create the user
+        const userData = {
+            is_superuser: requestBody.is_superuser,
+            document_type: requestBody.document_type,
+            full_name: `${requestBody.first_name} ${requestBody.last_name}`,
+            first_name: requestBody.first_name,
+            last_name: requestBody.last_name,
+            document_number: requestBody.document_number,
+            birth_date: requestBody.birth_date,
+            province: requestBody.province,
+            district: requestBody.district,
+            address: requestBody.address,
+            username: requestBody.document_number,
+        };
+
+        const userResponse = await fetch(`${process.env.BACKEND_API_URL}/api/users/`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
             },
-            body: parserBody
-        })
+            body: JSON.stringify(userData),
+        });
 
-        const data = await response.json()
-        console.log(data)
-        console.log(JSON.stringify(
-            {
-                junta_id: params.id,
-                user_id: data.id
-            }
-        ))
-
-        const newResponse = await fetch(`${process.env.BACKEND_API_URL}/api/juntas/add`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(
-                {
-                    junta_id: params.id,
-                    user_id: data.id
-                }
-            )
-        })
-        if (!newResponse.ok) {
-            return NextResponse.json({"Error": "Not user added to junta"})
+        if (!userResponse.ok) {
+            const errorData = await userResponse.json();
+            return NextResponse.json(errorData.detail, { status: userResponse.status });
         }
-        return NextResponse.json(data)
+
+        const newUser = await userResponse.json();
+
+        // Add the user to the junta
+        const juntaResponse = await fetch(`${process.env.BACKEND_API_URL}/api/juntas/add`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                junta_id: params.id,
+                user_id: newUser.id,
+            }),
+        });
+
+        if (!juntaResponse.ok) {
+            return NextResponse.json({ error: 'Failed to add user to junta' }, { status: juntaResponse.status });
+        }
+
+        return NextResponse.json(newUser);
     } catch (error) {
         console.error('Error creating user:', error);
         return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });

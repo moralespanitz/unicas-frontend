@@ -18,11 +18,12 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json(capitalSocial);
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
     // try {
         const { getToken } = getAuth(request);
         const token = await getToken({ template: 'test' });
         const body = await request.json(); 
+        console.log(body);
         const response = await fetch(`${process.env.BACKEND_API_URL}/api/capital/ingreso/`, {
             method: 'POST',
             headers: {
@@ -33,8 +34,11 @@ export async function POST(request: NextRequest) {
                 type : body.type,
                 amount: body.amount,
                 capital_social: body.capital_social
+                // junta: params.id
             })
         });
+        const data = await response.json();
+        console.log(data);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

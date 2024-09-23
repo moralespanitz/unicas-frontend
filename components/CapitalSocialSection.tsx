@@ -188,7 +188,12 @@ export default function CapitalSocialSection({ juntaId }: { juntaId: string }) {
                 <FormItem>
                   <FormLabel>Monto</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                    <Input 
+                      type="number" 
+                      {...field} 
+                      onChange={e => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
+                      value={field.value === 0 ? '' : field.value}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -228,7 +233,12 @@ export default function CapitalSocialSection({ juntaId }: { juntaId: string }) {
                 <FormItem>
                   <FormLabel>Monto</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={e => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
+                      value={field.value === 0 ? '' : field.value}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

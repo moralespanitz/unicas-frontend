@@ -30,7 +30,8 @@ export async function POST(request: NextRequest) {
             {
                 "is_superuser": requestBody.is_superuser,
                 "document_type": requestBody.document_type,
-                "full_name": requestBody.full_name,
+                "first_name": requestBody.first_name,
+                "last_name": requestBody.last_name,
                 "document_number": requestBody.document_number,
                 "birth_date": requestBody.birth_date,
                 "province": requestBody.province,
@@ -49,7 +50,8 @@ export async function POST(request: NextRequest) {
             body: parserBody
         })
         const data = await response.json()
-        return NextResponse.json(data)
+        console.log(data)
+        return NextResponse.json({})
     } catch (error) {
         console.error('Error creating user:', error);
         return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });

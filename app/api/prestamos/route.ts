@@ -13,18 +13,21 @@ export async function GET(request: NextRequest) {
       'Authorization': `Bearer ${token}`,
     },
   });
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  const loanPayments = await response.json(); // Get loan payments from the response
-  return NextResponse.json(loanPayments);
+  // if (!response.ok) {
+  //   throw new Error(`HTTP error! status: ${response.status}`);
+  // }
+  // const loanPayments = await response.json(); // Get loan payments from the response
+  // return NextResponse.json(loanPayments);
+  return NextResponse.json({});
 }
 
 export async function POST(request: NextRequest) {
-  try {
+  // try {
     const { getToken } = getAuth(request)
     const token = await getToken({ template: 'test' })
     const data = await request.json();
+    const jsonBody = JSON.stringify(data)
+    console.log(jsonBody)
     const response = await fetch(`${process.env.BACKEND_API_URL}/api/prestamos/`,
       {
         method: 'POST',
@@ -32,17 +35,23 @@ export async function POST(request: NextRequest) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(data)
+        body: jsonBody,
       }
     )
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return NextResponse.json(data, { status: 201 });
-  } catch (error) {
-    console.error('Error posting loan payment:', error);
-    return NextResponse.json({ error: 'Failed to post loan payment' }, { status: 500 });
-  }
+
+    const responseData = await response.json()
+    // console.log(responseData)
+    // if (!response.ok) {
+    //   throw new Error(`HTTP error! status: ${response.status}`)
+    // }
+    // return NextResponse.json(data, { status: 201 });
+    
+    // return NextResponse.json(responseData, { status: 201 });
+    return NextResponse.json({})
+  // } catch (error) {
+  //   console.error('Error posting loan payment:', error);
+  //   return NextResponse.json({ error: 'Failed to post loan payment' }, { status: 500 });
+  // }
 }
 
 export async function DELETE(request: NextRequest) {

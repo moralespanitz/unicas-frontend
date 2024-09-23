@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EditIcon, Trash2Icon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-
+import { useToast } from "@/hooks/use-toast";
 function MembersList({ members, onEdit, onDelete }: { members: any[]; onEdit: (member: any, updatedMember: any) => void; onDelete: (memberId: number) => void }) {
     return (
         <Card>
@@ -47,8 +47,10 @@ function MembersList({ members, onEdit, onDelete }: { members: any[]; onEdit: (m
 }
 
 const MemberSection = ({ juntaId }: { juntaId: string }) => {
+    const { toast } = useToast();
     const [newMember, setNewMember] = useState({
-        full_name: '',
+        first_name: '',
+        last_name: '',
         document_type: 'DNI' as 'DNI' | 'CE',
         document_number: '',
         birth_date: '',
@@ -61,19 +63,30 @@ const MemberSection = ({ juntaId }: { juntaId: string }) => {
     const [members, setMembers] = useState<any>([]);
 
     const handleAddMember = async () => {
-        // Mock function to add a new member
-        console.log('New member added:', newMember);
-        // Here you would typically call an API to add the member
-        // and then reset the form or update the UI
-        const response = await fetch(`/api/members/${juntaId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newMember),
-        });
-        const data: any = await response.json();
-        setMembers([...members, data]);
+        try {
+            const response = await fetch(`/api/members/${juntaId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newMember),
+            });
+            const data = await response.json()
+            if (!response.ok) {
+                throw new Error(data);
+            }
+            setMembers([...members, data]);
+            toast({
+                title: "Éxito",
+                description: "Miembro agregado correctamente",
+            });
+        } catch (error: any) {
+            toast({
+                title: "Error",
+                description: error.message,
+                variant: "destructive",
+            });
+        }
     };
     const handleDeleteMember = async (id: number) => {
         const response = await fetch(`/api/members/${juntaId}`, {
@@ -122,8 +135,12 @@ const MemberSection = ({ juntaId }: { juntaId: string }) => {
                     <form className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <Label htmlFor="fullName">Nombre Completo</Label>
-                                <Input id="fullName" value={newMember.full_name} onChange={(e) => setNewMember({ ...newMember, full_name: e.target.value })} />
+                                <Label htmlFor="firt_name">Nombres</Label>
+                                <Input id="firt_name" value={newMember.first_name} onChange={(e) => setNewMember({ ...newMember, first_name: e.target.value })} />
+                            </div>
+                            <div>
+                                <Label htmlFor="last_name">Apellidos</Label>
+                                <Input id="last_name" value={newMember.last_name} onChange={(e) => setNewMember({ ...newMember, last_name: e.target.value })} />
                             </div>
                             <div>
                                 <Label htmlFor="documentType">Tipo de Documento</Label>

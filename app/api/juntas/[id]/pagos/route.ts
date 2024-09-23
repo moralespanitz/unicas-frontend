@@ -14,7 +14,8 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         'member': data.member,
-        'prestamo': data.loan
+        'prestamo': data.loan,
+        'paymentAmount': data.paymentAmount, // New field
       })
     });
 

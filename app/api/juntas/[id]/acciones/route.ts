@@ -20,7 +20,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   return NextResponse.json(acciones);
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { getToken } = getAuth(request);
     const token = await getToken({ template: 'test' });
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       "date": data.date,
       "quantity": data.quantity,
       "value": data.value,
-      "junta": data.junta
+      "junta": params.id
     }
     console.log(jsonBody);
     const response = await fetch(`${process.env.BACKEND_API_URL}/api/acciones/`, {
@@ -67,7 +67,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
         'Authorization': `Bearer ${token}`,
       },
     });
-
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

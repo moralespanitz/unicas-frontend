@@ -32,12 +32,12 @@ const ResumenSection = ({ juntaId } : { juntaId: string }) => {
 
         const pagosResponse = await fetch(`/api/juntas/${juntaId}/pagos`);
         const pagosData = await pagosResponse.json();
+        setPagos(pagosData);
 
         const capitalResponse = await fetch(`/api/juntas/${juntaId}/capital`);
         const capitalData = await capitalResponse.json();
 
-        setPagos(pagosData);
-        // setCapital(capitalData);
+        setCapital(capitalData);
       } catch (error) {
         console.error('Error fetching data:', error);
       }

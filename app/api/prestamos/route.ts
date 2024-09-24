@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     )
 
     const responseData = await response.json()
-    // console.log(responseData)
+    console.log(responseData)
     // if (!response.ok) {
     //   throw new Error(`HTTP error! status: ${response.status}`)
     // }

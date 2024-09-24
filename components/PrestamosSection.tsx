@@ -22,6 +22,7 @@ interface LoanPayment {
     member: number; // Updated field
     junta: number; // Updated field
     loan_type: string; // New field
+    // monthly_payment: number | null; // New field
 }
 
 
@@ -99,7 +100,7 @@ const PrestamosSection = ({ juntaId }: { juntaId: string }) => {
                 remaining_amount: nuevoPrestamoForm.montoSolicitado,
                 remaining_installments: nuevoPrestamoForm.cantidadCuotas,
                 member: parseInt(nuevoPrestamoForm.miembro),
-                junta: 1,
+                junta: juntaId,
                 loan_type: nuevoPrestamoForm.tipoPrestamo, // New field
             };
 

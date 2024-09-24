@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/form";
 import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
+import { Input } from './ui/input';
+import { Toggle } from './ui/toggle';
 
 interface Member {
   id: string;
@@ -50,13 +52,14 @@ interface LoanPayment {
   cuota: number; // Updated field
   fecha_pago: string; // Updated field
   loan_type: string; // New field
+  monthly_payment: number | null; // New field
 }
-
 
 const formSchema = z.object({
   date: z.date(),
   member: z.string().min(1, { message: "Please select a member" }),
   loan: z.string().min(1, { message: "Please select a loan" }),
+  monthly_payment: z.number().min(0, { message: "Please enter a valid monthly payment" }),
 });
 
 export default function PagosSection({ juntaId }: { juntaId: string }) {
@@ -66,7 +69,9 @@ export default function PagosSection({ juntaId }: { juntaId: string }) {
   const [prestamos, setPrestamos] = useState<LoanPayment[]>([]);
   const [history, setHistory] = useState<LoanPayment[]>([]);
   const [selectedMember, setSelectedMember] = useState<string | null>(null); // New state for selected member
+  const [selectedLoan, setSelectedLoan] = useState<LoanPayment | null>(null);
   const { toast } = useToast();
+  const [showDifferentPayment, setShowDifferentPayment] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -74,6 +79,7 @@ export default function PagosSection({ juntaId }: { juntaId: string }) {
       date: new Date(),
       member: "",
       loan: "",
+      monthly_payment: 0,
     },
   });
 
@@ -98,9 +104,9 @@ export default function PagosSection({ juntaId }: { juntaId: string }) {
 
   const fetchPrestamos = async (): Promise<void> => {
     try {
-      const response = await fetch('/api/prestamos');
+      const response = await fetch(`/api/prestamos/${juntaId}`);
       if (!response.ok) throw new Error('Failed to fetch prestamos');
-      const data: LoanPayment[] = await response.json();
+      const data = await response.json();
       setPrestamos(data);
     } catch (error) {
       console.error('Error fetching prestamos:', error);
@@ -261,7 +267,19 @@ export default function PagosSection({ juntaId }: { juntaId: string }) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Préstamo</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedMember}>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          const loan = prestamos.find(p => p.id.toString() === value);
+                          setSelectedLoan(loan || null);
+                          // Update the monthly_payment field when a loan is selected
+                          if (loan) {
+                            form.setValue("monthly_payment", loan.monthly_payment || 0);
+                          }
+                        }}
+                        defaultValue={field.value}
+                        disabled={!selectedMember}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Seleccionar préstamo" />
@@ -270,30 +288,72 @@ export default function PagosSection({ juntaId }: { juntaId: string }) {
                         <SelectContent>
                           {
                             prestamos.length > 0 ? (
-                            prestamos.filter(prestamo => prestamo.member === Number(selectedMember)).length > 0 ? (
-                              prestamos
-                                .filter(prestamo => prestamo.member === Number(selectedMember))
-                                .map((prestamo) => (
-                                  <SelectItem key={prestamo.id} value={prestamo.id.toString()}>{prestamo.amount} soles - {prestamo.member_name} - {prestamo.request_date}</SelectItem>
-                                ))
+                              prestamos.filter(prestamo => prestamo.member === Number(selectedMember)).length > 0 ? (
+                                prestamos
+                                  .filter(prestamo => prestamo.member === Number(selectedMember))
+                                  .map((prestamo) => (
+                                    <SelectItem key={prestamo.id} value={prestamo.id.toString()}>{prestamo.amount} soles - {prestamo.member_name} - {prestamo.request_date} - {prestamo.loan_type}</SelectItem>
+                                  ))
+                              ) : (
+                                <SelectItem value='No hay prestamos' disabled>No hay prestamos</SelectItem> // Display message if no loans
+                              )
                             ) : (
-                              <SelectItem value='No hay prestamos' disabled>No hay prestamos</SelectItem> // Display message if no loans
-                            )
-                          ) : (
-                            <SelectItem value='No hay prestamos' disabled>No hay prestamos</SelectItem>
-                          )}
+                              <SelectItem value='No hay prestamos' disabled>No hay prestamos</SelectItem>
+                            )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                {/* Cuota a pagar                  */}
+                {/* <div className='mt-2'>
+                  <Label className='text-sm text-gray-500'>
+                    {selectedLoan?.monthly_payment == null && "Es una cuota variable"}
+                    {selectedLoan && (selectedLoan.monthly_payment != null && `Cuota mensual: S/${selectedLoan.monthly_payment}`)}
+                  </Label>
+                </div> */}
+
+                {selectedLoan && (
+                  <Toggle>
+                    {selectedLoan.monthly_payment == null && "Es una cuota variable"}
+                    {selectedLoan.monthly_payment != null && <p><span className='text-sm font-semibold'>Cuota mensual:</span> S/{selectedLoan.monthly_payment.toFixed(2)}</p>}
+                  </Toggle>
+                )}
+
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="registrarCuotaDiferente" />
+                  <Checkbox 
+                    id="registrarCuotaDiferente" 
+                    checked={showDifferentPayment}
+                    onCheckedChange={(checked) => setShowDifferentPayment(checked as boolean)}
+                  />
                   <Label htmlFor="registrarCuotaDiferente">
                     Registrar cuota diferente
                   </Label>
                 </div>
+
+                {showDifferentPayment && (
+                  <FormField
+                    control={form.control}
+                    name="monthly_payment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Monto de pago diferente</FormLabel>
+                        <Input 
+                          type="number" 
+                          {...field} 
+                          placeholder="Ingrese el monto de pago"
+                          value={field.value || ''}
+                          onChange={(e) => {
+                            field.onChange(parseFloat(e.target.value) || 0);
+                          }}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                
                 <Button type="submit">Realizar Pago</Button>
               </form>
             </Form>

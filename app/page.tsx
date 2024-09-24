@@ -28,10 +28,11 @@ const Home: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (activeView === 'admin') {
+    // if (activeView === 'admin') {
       handleGetJuntas();
-    }
-  }, [activeView]);
+    // }
+  // }, [activeView]);
+  }, []);
 
   const handleGetJuntas = async () => {
     setLoading(true);
@@ -106,7 +107,7 @@ const Home: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex justify-between w-full gap-4">
+            {/* <div className="flex justify-between w-full gap-4">
               <Button
                 onClick={() => setActiveView(activeView === 'member' ? null : 'member')}
                 className={`flex-1 ${activeView === 'member' ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"} hover:opacity-90 transition-all duration-300`}
@@ -119,9 +120,9 @@ const Home: React.FC = () => {
               >
                 Vista Admin
               </Button>
-            </div>
+            </div> */}
 
-            {activeView === 'member' && (
+            {/* {activeView === 'member' && (
               <div className="animate-in fade-in duration-300 space-y-4">
                 <SignedOut>
                   <Input
@@ -140,9 +141,9 @@ const Home: React.FC = () => {
                   </SignOutButton>
                 </SignedIn>
               </div>
-            )}
+            )} */}
 
-            {activeView === 'admin' && (
+            {/* {activeView === 'admin' && (
               <div className="animate-in fade-in duration-300 space-y-4">
                 <SignedOut>
                   <SignInButton mode="modal">
@@ -160,11 +161,30 @@ const Home: React.FC = () => {
                   </div>
                 </SignedIn>
               </div>
-            )}
+            )} */}
+            <div className="animate-in fade-in duration-300 space-y-4">
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <Button className="w-full">Iniciar sesión </Button>
+                </SignInButton>
+              </SignedOut>
+              <SignedIn>
+                <div className="flex items-center justify-between">
+                  <UserButton afterSignOutUrl="/" />
+                  <SignOutButton>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <LogOut className="w-4 h-4" /> Cerrar sesión
+                    </Button>
+                  </SignOutButton>
+                </div>
+              </SignedIn>
+            </div>
+
           </CardContent>
         </Card>
 
-        {activeView === 'admin' && <AdminView />}
+        {/* {activeView === 'admin' && <AdminView />} */}
+        <AdminView />
       </div>
 
       <AlertDialog open={!!deleteJuntaId} onOpenChange={(open) => !open && setDeleteJuntaId(null)}>

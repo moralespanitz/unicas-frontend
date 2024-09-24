@@ -52,47 +52,73 @@ export default function AccionesSection({ juntaId }: { juntaId: string }) {
       value: 0,
     },
   });
+  const fetchHistory = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/juntas/${juntaId}/acciones`);
+      if (response.ok) {
+        const data = await response.json();
+        setHistory(data);
+      }
+    } catch (error) {
+      console.error('Error fetching acciones:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const fetchMembers = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/members/${juntaId}`);
+      if (!response.ok) throw new Error('Failed to fetch members');
+      const data = await response.json();
+      setMembers(data);
+    } catch (error) {
+      console.error('Error fetching members:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchMembers = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`/api/members/${juntaId}`);
-        if (!response.ok) throw new Error('Failed to fetch members');
-        const data = await response.json();
-        setMembers(data);
-      } catch (error) {
-        console.error('Error fetching members:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    const fetchHistory = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`/api/juntas/${juntaId}/acciones`);
-        if (response.ok) {
-          const data = await response.json();
-          setHistory(data);
-        }
-      } catch (error) {
-        console.error('Error fetching acciones:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchMembers();
     fetchHistory();
   }, [juntaId]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    // Submission logic...
+    try {
+      const jsonBody = {
+        "member": values.member,
+        "date": values.date,
+        "quantity": values.quantity,
+        "value": values.value,
+        "junta": juntaId
+      }
+      const response = await fetch(`/api/juntas/${juntaId}/acciones`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(jsonBody)
+      });
+      if (!response.ok) throw new Error('Failed to add accion');
+      await fetchHistory();
+    } catch (error) {
+      console.error('Error adding accion:', error);
+    }
   };
 
   const handleDeleteAccion = async (accionId: number) => {
-    // Delete accion logic...
+    console.log('Se elimina accion con id:', accionId);
+    try {
+      const response = await fetch(`/api/juntas/${juntaId}/acciones`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: accionId })
+      });
+      if (!response.ok) throw new Error('Failed to delete accion');
+      await fetchHistory();
+    } catch (error) {
+      console.error('Error deleting accion:', error);
+    }
   };
 
   if (loading) {
@@ -143,9 +169,8 @@ export default function AccionesSection({ juntaId }: { juntaId: string }) {
                         <FormControl>
                           <Button
                             variant={"outline"}
-                            className={`w-full pl-3 text-left font-normal ${
-                              !field.value && "text-muted-foreground"
-                            }`}
+                            className={`w-full pl-3 text-left font-normal ${!field.value && "text-muted-foreground"
+                              }`}
                           >
                             {field.value ? (
                               format(field.value, "PPP")

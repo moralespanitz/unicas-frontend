@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const { getToken } = getAuth(request)
   const token = await getToken({ template: 'test' })
 
-  const response = await fetch(`${process.env.BACKEND_API_URL}/api/prestamos/`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/prestamos/`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     const jsonBody = JSON.stringify(data)
     console.log(jsonBody)
-    const response = await fetch(`${process.env.BACKEND_API_URL}/api/prestamos/`,
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/prestamos/`,
       {
         method: 'POST',
         headers: {
@@ -60,7 +60,7 @@ export async function DELETE(request: NextRequest) {
     const token = await getToken({ template: 'test' })
     const { id } = await request.json(); // Expecting an ID in the request body
 
-    const response = await fetch(`${process.env.BACKEND_API_URL}/api/prestamos/${id}/`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/prestamos/${id}/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

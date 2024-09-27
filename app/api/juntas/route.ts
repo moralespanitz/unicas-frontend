@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   const { getToken } = getAuth(request)
   const token = await getToken({ template: 'test' })
 
-  const response = await fetch(`${process.env.BACKEND_API_URL}/api/juntas/`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/juntas/`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
   const { getToken } = getAuth(request)
   const token = await getToken({ template: 'test' })
   const requestBody = await request.json()
-  const response = await fetch(`${process.env.BACKEND_API_URL}/api/juntas/`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/juntas/`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -37,7 +37,7 @@ export async function DELETE(request: NextRequest) {
   const requestBody = await request.json()
   console.log(requestBody)
   if (requestBody.id) {
-    const response = await fetch(`${process.env.BACKEND_API_URL}/api/juntas/${requestBody.id}/`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/juntas/${requestBody.id}/`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,

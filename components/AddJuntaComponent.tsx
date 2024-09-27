@@ -68,7 +68,8 @@ export const AddJuntaComponent = ({ onJuntaAdded }: AddJuntaComponentProps) => {
         className="w-min bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
       >
         <PlusCircle className="mr-2 h-6 w-6" />
-        Crear nueva junta
+        Crear nueva UNICA
+
       </Button>
       <Dialog open={showNewJuntaDialog} onOpenChange={setShowNewJuntaDialog}>
         <DialogContent className="sm:max-w-[425px] bg-white rounded-xl shadow-2xl text-black">

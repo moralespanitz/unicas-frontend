@@ -5,7 +5,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   const { getToken } = getAuth(request);
   const token = await getToken({ template: 'test' });
   console.log('Params id', params.id)
-  const response = await fetch(`${process.env.BACKEND_API_URL}/api/capital/social/junta/${params.id}`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/capital/social/junta/${params.id}`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,

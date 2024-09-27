@@ -6,17 +6,25 @@ export async function POST(request: NextRequest) {
     const { getToken } = getAuth(request);
     const token = await getToken({ template: 'test' });
     const data = await request.json();
-    const response = await fetch(`${process.env.BACKEND_API_URL}/api/pagosprestamos/`, {
+
+    console.log('data')
+
+    console.log(data)
+    // Format the date as YYYY-MM-DD
+    const formattedDate = new Date(data.date).toISOString().split('T')[0];
+    const jsonBody = {
+      'member': data.member,
+      'fecha_pago': formattedDate,
+      'prestamo': data.loan,
+      'custom_amount': data.custom_amount, // New field
+    }
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/pagosprestamos/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        'member': data.member,
-        'prestamo': data.loan,
-        'paymentAmount': data.paymentAmount, // New field
-      })
+      body: JSON.stringify(jsonBody)
     });
 
     if (!response.ok) {
@@ -35,7 +43,7 @@ export async function POST(request: NextRequest) {
     const { getToken } = getAuth(request);
     const token = await getToken({ template: 'test' });
 
-    const response = await fetch(`${process.env.BACKEND_API_URL}/api/pagosprestamos/junta/${params.id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/pagosprestamos/junta/${params.id}`, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,

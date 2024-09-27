@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
     const { getToken } = getAuth(request);
     const token = await getToken({ template: 'test' });
-    const response = await fetch(`${process.env.BACKEND_API_URL}/api/capital/ingreso/`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/capital/ingreso/`, {
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         const token = await getToken({ template: 'test' });
         const body = await request.json(); 
         console.log(body);
-        const response = await fetch(`${process.env.BACKEND_API_URL}/api/capital/ingreso/`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/capital/ingreso/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

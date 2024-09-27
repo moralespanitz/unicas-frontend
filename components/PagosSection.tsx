@@ -60,6 +60,7 @@ const formSchema = z.object({
   member: z.string().min(1, { message: "Please select a member" }),
   loan: z.string().min(1, { message: "Please select a loan" }),
   monthly_payment: z.number().min(0, { message: "Please enter a valid monthly payment" }),
+  custom_amount: z.number().min(0, { message: "Please enter a valid custom amount" }),
 });
 
 export default function PagosSection({ juntaId }: { juntaId: string }) {
@@ -67,7 +68,7 @@ export default function PagosSection({ juntaId }: { juntaId: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [loans, setLoans] = useState<Loan[]>([]);
   const [prestamos, setPrestamos] = useState<LoanPayment[]>([]);
-  const [history, setHistory] = useState<LoanPayment[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
   const [selectedMember, setSelectedMember] = useState<string | null>(null); // New state for selected member
   const [selectedLoan, setSelectedLoan] = useState<LoanPayment | null>(null);
   const { toast } = useToast();
@@ -80,6 +81,7 @@ export default function PagosSection({ juntaId }: { juntaId: string }) {
       member: "",
       loan: "",
       monthly_payment: 0,
+      custom_amount: 0,
     },
   });
 
@@ -142,9 +144,12 @@ export default function PagosSection({ juntaId }: { juntaId: string }) {
     }
 
     let paymentAmount = selectedPrestamo.cuota;
+
     if (selectedPrestamo.loan_type === 'Cuota variable') {
+
       // Prompt user to enter custom payment amount for 'Cuota variable'
       const customAmount = prompt('Ingrese el monto de pago para este préstamo de cuota variable:');
+
       if (customAmount !== null) {
         paymentAmount = parseFloat(customAmount);
       } else {
@@ -315,45 +320,67 @@ export default function PagosSection({ juntaId }: { juntaId: string }) {
                 </div> */}
 
                 {selectedLoan && (
-                  <Toggle>
-                    {selectedLoan.monthly_payment == null && "Es una cuota variable"}
+                  <div>
+                    {selectedLoan.monthly_payment == null && 
+                    <FormField
+                      control={form.control}
+                      name="monthly_payment"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Monto de pago diferente</FormLabel>
+                          <Input 
+                            type="number"
+                            {...field}
+                            placeholder="Ingrese el monto de pago"
+                            value={field.value || ''}
+                            onChange={(e) => {
+                              field.onChange(parseFloat(e.target.value) || 0);
+                            }}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    }
                     {selectedLoan.monthly_payment != null && <p><span className='text-sm font-semibold'>Cuota mensual:</span> S/{selectedLoan.monthly_payment.toFixed(2)}</p>}
-                  </Toggle>
+                  </div>
                 )}
 
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="registrarCuotaDiferente" 
-                    checked={showDifferentPayment}
-                    onCheckedChange={(checked) => setShowDifferentPayment(checked as boolean)}
-                  />
-                  <Label htmlFor="registrarCuotaDiferente">
-                    Registrar cuota diferente
-                  </Label>
-                </div>
-
-                {showDifferentPayment && (
-                  <FormField
-                    control={form.control}
-                    name="monthly_payment"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Monto de pago diferente</FormLabel>
-                        <Input 
-                          type="number" 
-                          {...field} 
-                          placeholder="Ingrese el monto de pago"
-                          value={field.value || ''}
-                          onChange={(e) => {
-                            field.onChange(parseFloat(e.target.value) || 0);
-                          }}
-                        />
-                        <FormMessage />
-                      </FormItem>
+                {selectedLoan?.monthly_payment != null && (
+                  <>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="registrarCuotaDiferente" 
+                        checked={showDifferentPayment}
+                        onCheckedChange={(checked) => setShowDifferentPayment(checked as boolean)}
+                      />
+                      <Label htmlFor="registrarCuotaDiferente">
+                        Registrar cuota diferente
+                      </Label>
+                    </div>
+                    {showDifferentPayment && (
+                      <FormField
+                        control={form.control}
+                        name="custom_amount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Monto de pago diferente</FormLabel>
+                            <Input 
+                              type="number" 
+                              {...field} 
+                              placeholder="Ingrese el monto de pago"
+                              value={field.value || ''}
+                              onChange={(e) => {
+                                field.onChange(parseFloat(e.target.value) || 0);
+                              }}
+                            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     )}
-                  />
+                  </>
                 )}
-                
                 <Button type="submit">Realizar Pago</Button>
               </form>
             </Form>
@@ -371,7 +398,7 @@ export default function PagosSection({ juntaId }: { juntaId: string }) {
               <TableHeader>
                 <TableRow>
                   <TableHead>Fecha</TableHead>
-                  <TableHead>Préstamo</TableHead>
+                  <TableHead>Préstamo ID</TableHead>
                   <TableHead>Tipo prestamo</TableHead>
                   <TableHead>Monto Cuota</TableHead>
                   <TableHead>Monto Interés</TableHead>
@@ -381,10 +408,10 @@ export default function PagosSection({ juntaId }: { juntaId: string }) {
                 {history.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell>{format(new Date(item.fecha_pago), "yyyy-MM-dd HH:mm:ss")}</TableCell>
-                    <TableCell>{item.amount}</TableCell>
-                    <TableCell>{item.loan_type}</TableCell>
-                    <TableCell>S/{item.cuota}</TableCell>
-                    <TableCell>S/{item.monthly_interest}</TableCell>
+                    <TableCell>{item.prestamo_id}</TableCell>
+                    <TableCell>{item.prestamo_loan_type}</TableCell>
+                    <TableCell>S/{item.custom_amount ? item.custom_amount : item.prestamo_monthly_payment}</TableCell>
+                    <TableCell>S/{item.prestamo_monthly_interest}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

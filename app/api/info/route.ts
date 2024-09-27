@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   const { getToken } = getAuth(request)
   const token = await getToken({ template: 'test' })
 
-  const response = await fetch(`${process.env.BACKEND_API_URL}/api/info`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/info`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }

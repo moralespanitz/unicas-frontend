@@ -11,7 +11,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     console.log('Junta id:', params.id);
     console.log('Multa slug:', params.slug);
 
-    const response = await fetch(`${process.env.BACKEND_API_URL}/api/multas/${params.slug}/`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/multas/${params.slug}/`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const token = await getToken({ template: 'test' });
     const data = await request.json();
 
-    const response = await fetch(`${process.env.BACKEND_API_URL}/api/multas/${params.id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/multas/${params.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

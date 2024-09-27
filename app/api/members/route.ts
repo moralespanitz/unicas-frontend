@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
         const { getToken } = getAuth(request)
         const token = await getToken({ template: 'test' })
         const data = await request.json();
-        const response = await fetch(`${process.env.BACKEND_API_URL}/api/junta-users/${data.id}/`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/junta-users/${data.id}/`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
             }
         )
         console.log('Parser body', parserBody)
-        const response = await fetch(`${process.env.BACKEND_API_URL}/api/users/`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -65,7 +65,7 @@ export async function DELETE(request: NextRequest) {
     const requestBody = await request.json()
     console.log(requestBody)
     if (requestBody.id) {
-        const response = await fetch(`${process.env.BACKEND_API_URL}/api/users/${requestBody.id}/`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${requestBody.id}/`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,

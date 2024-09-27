@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(request: NextRequest, {params} : {params : {id : string}}) {
     const { getToken } = getAuth(request)
     const token = await getToken({ template: 'test' })
-    const response = await fetch(`${process.env.BACKEND_API_URL}/api/juntas/${params.id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/juntas/${params.id}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest, {params} : {params : {id : strin
 export async function DELETE(request: NextRequest, {params} : {params : {id : string}}) {
   const { getToken } = getAuth(request)
   const token = await getToken({ template: 'test' })
-  const response = await fetch(`${process.env.BACKEND_API_URL}/api/juntas/${params.id}`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/juntas/${params.id}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${token}`

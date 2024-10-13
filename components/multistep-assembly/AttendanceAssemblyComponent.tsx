@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Check, X, Clock } from "lucide-react"
 import { 
@@ -23,6 +23,7 @@ interface AttendanceData {
 }
 
 interface AttendanceAssemblySectionProps {
+  juntaId: string;
   socios: Socio[];
   assemblyDates: string[];
   attendance: AttendanceData;
@@ -66,8 +67,8 @@ const AttendanceButton: React.FC<{ status: string; onChange: (status: string) =>
   )
 }
 
-const AttendanceAssemblySection: React.FC<AttendanceAssemblySectionProps> = ({ socios, assemblyDates, attendance, onAttendanceChange }) => {
-  return (
+const AttendanceAssemblySection = ({juntaId, socios, assemblyDates, attendance, onAttendanceChange }: AttendanceAssemblySectionProps) => {
+   return (
     <div>
       <p className="mb-4">Total socios activos: {socios.length}</p>
       <Table>
@@ -80,7 +81,7 @@ const AttendanceAssemblySection: React.FC<AttendanceAssemblySectionProps> = ({ s
           </TableRow>
         </TableHeader>
         <TableBody>
-          {socios.map(socio => (
+          {socios.map(socio=> (
             <TableRow key={socio.id}>
               <TableCell>{socio.name}</TableCell>
               {assemblyDates.map(date => (

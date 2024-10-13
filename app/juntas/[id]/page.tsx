@@ -33,7 +33,7 @@ const UNICAVecinalDashboard = ({ params }: { params: { id: string } }) => {
                 setIsLoading(false);
             });
     }
-    
+
     useEffect(() => {
         setIsClient(true);
         handleGetJunta();
@@ -54,8 +54,10 @@ const UNICAVecinalDashboard = ({ params }: { params: { id: string } }) => {
 
     return (
         <div className="container mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen">
+
             <Card className="mb-6 shadow-lg">
                 <CardHeader className="bg-primary text-primary-foreground">
+
                     <div className="flex items-center justify-between">
                         <CardTitle className="text-2xl sm:text-3xl font-bold">UNICA Vecinal Dashboard</CardTitle>
                         <Link href="/">
@@ -67,6 +69,11 @@ const UNICAVecinalDashboard = ({ params }: { params: { id: string } }) => {
                     </div>
                 </CardHeader>
                 <CardContent className="pt-6">
+                    {/* <div className="flex justify-end">
+                        <Button>
+                            <Link href={`/juntas/${params.id}/asamblea`}>Ir a la asamblea</Link>
+                        </Button>
+                    </div> */}
                     {isLoading ? (
                         <Skeleton className="h-8 w-2/3 mb-4" />
                     ) : (

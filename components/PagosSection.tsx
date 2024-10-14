@@ -147,19 +147,7 @@ export default function PagosSection({ juntaId }: { juntaId: string }) {
 
     if (selectedPrestamo.loan_type === 'Cuota variable') {
 
-      // Prompt user to enter custom payment amount for 'Cuota variable'
-      const customAmount = prompt('Ingrese el monto de pago para este préstamo de cuota variable:');
-
-      if (customAmount !== null) {
-        paymentAmount = parseFloat(customAmount);
-      } else {
-        toast({
-          title: "Error",
-          description: "Debe ingresar un monto de pago para los préstamos de cuota variable.",
-          variant: "destructive",
-        });
-        return;
-      }
+      paymentAmount = values.custom_amount;
     }
 
     const response = await fetch(`/api/juntas/${juntaId}/pagos`, {
@@ -411,7 +399,7 @@ export default function PagosSection({ juntaId }: { juntaId: string }) {
                     <TableCell>{item.prestamo_id}</TableCell>
                     <TableCell>{item.prestamo_loan_type}</TableCell>
                     <TableCell>S/{item.custom_amount ? item.custom_amount : item.prestamo_monthly_payment}</TableCell>
-                    <TableCell>S/{item.prestamo_monthly_interest}</TableCell>
+                    <TableCell>{item.prestamo_monthly_interest*100}%</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
